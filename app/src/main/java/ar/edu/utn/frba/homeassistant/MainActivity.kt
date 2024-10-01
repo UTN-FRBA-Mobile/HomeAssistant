@@ -92,7 +92,7 @@ fun HomeAssistantMainScaffold() {
             BottomNavigationBar(
                     items = listOf(
                         // TODO: Use more meaningful icons
-                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.device),"Devices", "devices"),
+                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.devices),"Devices", "devices"),
                         BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.scenes), "Scenes", "scenes"),
                         BottomNavigationItem(Icons.Default.Settings, "Automations", "automations")
                     ),
