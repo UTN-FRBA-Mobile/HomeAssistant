@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.homeassistant
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Send
@@ -34,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -88,8 +92,8 @@ fun HomeAssistantMainScaffold() {
             BottomNavigationBar(
                     items = listOf(
                         // TODO: Use more meaningful icons
-                        BottomNavigationItem(Icons.Default.Home, "Devices", "devices"),
-                        BottomNavigationItem(Icons.Default.Star, "Scenes", "scenes"),
+                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.device),"Devices", "devices"),
+                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.scenes), "Scenes", "scenes"),
                         BottomNavigationItem(Icons.Default.Settings, "Automations", "automations")
                     ),
             navController = navController
