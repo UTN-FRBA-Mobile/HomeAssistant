@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="devices_label">Dispositivos</string>
+    <string name="scenes_label">Escenas</string>
+    <string name="automations_label">Automatizaciones</string>
+</resources>
