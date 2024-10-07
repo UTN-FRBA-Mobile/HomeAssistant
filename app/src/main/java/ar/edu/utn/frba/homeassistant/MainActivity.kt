@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,13 +77,23 @@ fun HomeAssistantMainScaffold() {
         },
         bottomBar = {
             BottomNavigationBar(
-                    items = listOf(
-                        // TODO: Use more meaningful icons
-                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.devices),"Devices", "devices"),
-                        BottomNavigationItem(ImageVector.vectorResource(id = R.drawable.scenes), "Scenes", "scenes"),
-                        BottomNavigationItem(Icons.Default.Settings, "Automations", "automations")
+                items = listOf(
+                    BottomNavigationItem(
+                        ImageVector.vectorResource(id = R.drawable.devices),
+                        R.string.devices_label, "devices"
                     ),
-            navController = navController
+                    BottomNavigationItem(
+                        ImageVector.vectorResource(id = R.drawable.scenes),
+                        R.string.scenes_label,
+                        "scenes"
+                    ),
+                    BottomNavigationItem(
+                        Icons.Default.Settings,
+                        R.string.automations_label,
+                        "automations"
+                    )
+                ),
+                navController = navController
             )
         }
     ) { innerPadding ->
@@ -119,7 +130,7 @@ fun HomeAssistantMainScaffold() {
 
 data class BottomNavigationItem(
     val icon: ImageVector,
-    val label: String,
+    val labelResourceId: Int,
     val route: String
 )
 
@@ -130,21 +141,23 @@ data class BottomNavigationItem(
 fun BottomNavigationBar(
     items: List<BottomNavigationItem>,
     navController: NavController,
-){
+) {
     var selectedTabIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
 
     NavigationBar {
         items.forEachIndexed { index, item ->
+            val label = stringResource(item.labelResourceId)
+
             NavigationBarItem(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label
+                        contentDescription = label
                     )
                 },
-                label = { Text(item.label) },
+                label = { Text(label) },
                 selected = index == selectedTabIndex,
                 onClick = {
                     selectedTabIndex = index
