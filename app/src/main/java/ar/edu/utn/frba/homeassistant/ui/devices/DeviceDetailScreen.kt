@@ -8,13 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import ar.edu.utn.frba.homeassistant.data.DeviceRepository
+import ar.edu.utn.frba.homeassistant.data.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceDetailScreen(navController: NavHostController, deviceId: String) {
-    val deviceRepository = remember { DeviceRepository() }
-    val device = deviceRepository.getDeviceById(deviceId)
+fun DeviceDetailScreen(navController: NavHostController, devices: List<Device>, deviceId: String) {
+    val device = devices.find { it.id == deviceId }
 
     if (device == null) {
         Text("Device not found", modifier = Modifier.padding(16.dp))
