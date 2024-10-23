@@ -33,6 +33,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
 
 class MainActivity : ComponentActivity() {
@@ -103,11 +104,7 @@ fun HomeAssistantMainScaffold() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("devices") {
-                Text(
-                    text = "Devices",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                DevicesTabContent()
             }
             composable("scenes") {
                 Text(
