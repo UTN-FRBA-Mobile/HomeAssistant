@@ -40,6 +40,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
+import ar.edu.utn.frba.homeassistant.utils.ShakeEventListener
+import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
@@ -56,36 +58,10 @@ class MainActivity : ComponentActivity() {
         }
 
         // This code is temporal for testing purposes
-        // Base: https://www.geeksforgeeks.org/how-to-detect-shake-event-in-android/
-        var currentAcceleration = 0f
-        var lastAcceleration = 0f
-        var acceleration = 10f
         val sensorManager: SensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val sensorShake = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
-        currentAcceleration = SensorManager.GRAVITY_EARTH
-        lastAcceleration = SensorManager.GRAVITY_EARTH
-
-        class MySensorEventListener : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-
-                val x = event.values[0]
-                val y = event.values[1]
-                val z = event.values[2]
-                lastAcceleration = currentAcceleration
-
-                currentAcceleration = sqrt(x * x + y * y + z * z.toDouble()).toFloat()
-                val delta: Float = currentAcceleration - lastAcceleration
-                acceleration = acceleration * 0.9f + delta
-                if (currentAcceleration > 12) {
-                    Toast.makeText(applicationContext, "Shake event detected", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                // Do something
-            }
+        registerShakeSensor(sensorManager) {
+            Toast.makeText(this, "Shake Detected", Toast.LENGTH_SHORT).show()
         }
-        sensorManager.registerListener(MySensorEventListener(), sensorShake, SensorManager.SENSOR_DELAY_NORMAL)
     }
 }
 
