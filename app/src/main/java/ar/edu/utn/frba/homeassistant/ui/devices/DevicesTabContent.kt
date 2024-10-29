@@ -8,10 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+
 @Composable
 fun DevicesTabContent(viewModel: DevicesViewModel = viewModel()) {
     val navController = rememberNavController()
-    val devices by viewModel.devices.collectAsStateWithLifecycle()
+    val devices by DevicesViewModel.devices.collectAsStateWithLifecycle()
 
 
     NavHost(navController, startDestination = "devicesList") {

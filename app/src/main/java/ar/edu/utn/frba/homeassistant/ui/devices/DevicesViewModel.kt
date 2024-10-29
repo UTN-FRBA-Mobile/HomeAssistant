@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.update
 
 class DevicesViewModel : ViewModel() {
 
-    private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    val devices: StateFlow<List<Device>> = _devices
+    companion object {
+        private val _devices = MutableStateFlow<List<Device>>(emptyList())
+        val devices: StateFlow<List<Device>> = _devices
+    }
 
     init {
         _devices.value = listOf(
