@@ -8,11 +8,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import ar.edu.utn.frba.homeassistant.data.Device
+import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceDetailScreen(navController: NavHostController, devices: List<Device>, deviceId: String) {
+fun DeviceDetailScreen(navController: NavHostController, devices: List<Device>, deviceId: Int) {
     val device = devices.find { it.id == deviceId }
 
     if (device == null) {

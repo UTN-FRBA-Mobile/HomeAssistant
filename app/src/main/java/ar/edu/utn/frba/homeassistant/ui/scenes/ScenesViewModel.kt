@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.homeassistant.ui.scenes
 
 import androidx.lifecycle.ViewModel
-import ar.edu.utn.frba.homeassistant.data.Device
+import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.Scene
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,13 +16,13 @@ class ScenesViewModel : ViewModel() {
         // Initialisation avec quelques scènes par défaut
         _scenes.value = listOf(
             Scene("1", "Cine", listOf(
-                Device("1", "Living Room Light", "Light", isOn = false),
-                Device("2", "Kitchen Light", "Light", isOn = false),
-                Device("3", "Bedroom Light", "Light", isOn = false)
+                Device(1, "Living Room Light", "Light", isOn = false),
+                Device(2, "Kitchen Light", "Light", isOn = false),
+                Device(3, "Bedroom Light", "Light", isOn = false)
             )),
             Scene("2", "Dîner", listOf(
-                Device("4", "Dining Room Light", "Light", isOn = false),
-                Device("5", "Music System", "Audio", isOn = false)
+                Device(4, "Dining Room Light", "Light", isOn = false),
+                Device(5, "Music System", "Audio", isOn = false)
             ))
         )
     }

@@ -1,33 +1,28 @@
 package ar.edu.utn.frba.homeassistant.ui.devices
 
 import androidx.lifecycle.ViewModel
-import ar.edu.utn.frba.homeassistant.data.Device
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.viewModelScope
+import ar.edu.utn.frba.homeassistant.data.model.Device
+import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DevicesViewModel : ViewModel() {
+@HiltViewModel
+class DevicesViewModel @Inject constructor(private val repository: AppRepository) : ViewModel() {
 
-    companion object {
-        private val _devices = MutableStateFlow<List<Device>>(emptyList())
-        val devices: StateFlow<List<Device>> = _devices
-    }
-
-    init {
-        _devices.value = listOf(
-            Device("1", "Living Room Light", "Light"),
-            Device("2", "Bedroom AC", "Air Conditioner"),
-            Device("3", "Kitchen Thermostat", "Thermostat")
-        )
-    }
+    val devices = repository.getDevices()
 
     fun addDevice(name: String, type: String) {
-        val newDevice = Device(id = (_devices.value.size + 1).toString(), name = name, type = type)
-        _devices.update { it + newDevice }
+        viewModelScope.launch {
+            repository.addDevice(name, type)
+        }
     }
 
     fun deleteDevice(device: Device) {
-        _devices.update { devices -> devices.filter { it.id != device.id } }
+        viewModelScope.launch {
+            repository.deleteDevice(device)
+        }
     }
-
 }
