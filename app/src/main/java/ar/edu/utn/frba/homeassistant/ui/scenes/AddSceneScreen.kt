@@ -16,15 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import ar.edu.utn.frba.homeassistant.data.Device
-import kotlinx.coroutines.flow.StateFlow
+import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSceneScreen(
     navController: NavHostController,
     onCreate: (String, List<Device>) -> Unit,
-    availableDevices: StateFlow<List<Device>>
+    availableDevices: List<Device>
 ) {
     var sceneName by remember { mutableStateOf("") }
     var selectedDevices by remember { mutableStateOf<List<Device>>(emptyList()) }
@@ -61,7 +60,7 @@ fun AddSceneScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // List of available devices with buttons to toggle selection
-            availableDevices.value.forEach { device ->
+            availableDevices.forEach { device ->
                 val isSelected = selectedDevices.contains(device)
 
                 OutlinedButton(
