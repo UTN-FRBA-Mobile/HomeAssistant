@@ -8,23 +8,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import ar.edu.utn.frba.homeassistant.data.Scene
 import ar.edu.utn.frba.homeassistant.data.model.Device
+import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SceneDetailScreen(
     navController: NavHostController,
-    scenes: List<Scene>,
-    sceneId: String,
-    onUpdateScene: (String, List<Device>) -> Unit // Accepter deux paramètres
+    scenes: List<SceneWithDevices>,
+    sceneId: Long,
+    onUpdateScene: (Long, List<Device>) -> Unit // Accepter deux paramètres
 ) {
-    val scene = scenes.find { it.id == sceneId }
+    val sceneWithDevices = scenes.find { it.scene.sceneId == sceneId }
 
-    if (scene == null) {
+    if (sceneWithDevices == null ) {
         Text("Scene not found", modifier = Modifier.padding(16.dp))
         return
     }
+
+    val scene = sceneWithDevices.scene
+    val sceneDevices = sceneWithDevices.devices
 
     Scaffold(
         topBar = {
@@ -47,14 +50,12 @@ fun SceneDetailScreen(
             Text("Scene Name: ${scene.name}", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(16.dp))
 
-            scene.devices.forEach { device ->
+            sceneDevices.forEach { device ->
                 DeviceToggleRow(device = device) { updatedDevice ->
-                    val updatedScene = scene.copy(
-                        devices = scene.devices.map {
-                            if (it.id == updatedDevice.id) updatedDevice else it
-                        }
-                    )
-                    onUpdateScene(updatedScene.id, updatedScene.devices)
+                    val updatedDevices = sceneDevices.map {
+                        if (it.deviceId == updatedDevice.deviceId) updatedDevice else it
+                    }
+                    onUpdateScene(scene.sceneId, updatedDevices)
                 }
             }
         }

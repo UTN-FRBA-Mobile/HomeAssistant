@@ -81,7 +81,7 @@ fun DeviceRow(device: Device, navController: NavController, onDelete: () -> Unit
         Column(modifier = Modifier
             .weight(1f)
             .clickable {
-                navController.navigate("deviceDetail/${device.id}")
+                navController.navigate("deviceDetail/${device.deviceId}")
             }
         ) {
             Text(text = device.name, style = MaterialTheme.typography.titleMedium)

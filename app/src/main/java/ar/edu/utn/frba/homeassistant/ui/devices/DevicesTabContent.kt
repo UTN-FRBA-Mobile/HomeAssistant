@@ -19,7 +19,7 @@ fun DevicesTabContent(viewModel: DevicesViewModel = hiltViewModel()) {
             DevicesScreen(navController, devices, viewModel::deleteDevice)
         }
         composable("deviceDetail/{deviceId}") { backStackEntry ->
-            val deviceId = backStackEntry.arguments?.getString("deviceId")?.toInt() ?: -1
+            val deviceId = backStackEntry.arguments?.getString("deviceId")?.toLong() ?: -1
             DeviceDetailScreen(navController, devices, deviceId)
         }
         composable("addDevice") {
