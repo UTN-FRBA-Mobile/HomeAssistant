@@ -27,4 +27,8 @@ class DatabaseModule {
     @Singleton
     @Provides
     fun provideDeviceDao(db: AppDatabase) = db.deviceDao()
+
+    @Singleton
+    @Provides
+    fun provideSceneDao(db: AppDatabase) = db.sceneDao()
 }

@@ -12,8 +12,8 @@ import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceDetailScreen(navController: NavHostController, devices: List<Device>, deviceId: Int) {
-    val device = devices.find { it.id == deviceId }
+fun DeviceDetailScreen(navController: NavHostController, devices: List<Device>, deviceId: Long) {
+    val device = devices.find { it.deviceId == deviceId }
 
     if (device == null) {
         Text("Device not found", modifier = Modifier.padding(16.dp))

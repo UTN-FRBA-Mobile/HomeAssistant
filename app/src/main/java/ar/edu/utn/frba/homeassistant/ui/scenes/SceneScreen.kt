@@ -13,11 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ar.edu.utn.frba.homeassistant.data.model.Device
-import ar.edu.utn.frba.homeassistant.data.Scene
+import ar.edu.utn.frba.homeassistant.data.model.Scene
+import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScenesScreen(navController: NavController, scenes: List<Scene>, onDelete: (Scene) -> Unit) {
+fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, onDelete: (Scene) -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -33,6 +34,7 @@ fun ScenesScreen(navController: NavController, scenes: List<Scene>, onDelete: (S
         }
     ) { paddingValues ->
         LazyColumn(
+            contentPadding = paddingValues,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
@@ -41,8 +43,8 @@ fun ScenesScreen(navController: NavController, scenes: List<Scene>, onDelete: (S
                 val scene = scenes[index]
                 SceneItem(scene)
                 Spacer(modifier = Modifier.height(8.dp))
-                SceneRow(scene, navController, onDelete = {
-                    onDelete(scene)
+                SceneRow(scene.scene, navController, onDelete = {
+                    onDelete(scene.scene)
                 })
                 HorizontalDivider()
             }
@@ -51,8 +53,10 @@ fun ScenesScreen(navController: NavController, scenes: List<Scene>, onDelete: (S
 }
 
 @Composable
-fun SceneItem(scene: Scene) {
+fun SceneItem(sceneWithDevices: SceneWithDevices) {
     var expanded by remember { mutableStateOf(false) }
+    val scene = sceneWithDevices.scene
+    val sceneDevices = sceneWithDevices.devices
 
     Column(
         modifier = Modifier
@@ -63,7 +67,7 @@ fun SceneItem(scene: Scene) {
         Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
 
         if (expanded) {
-            scene.devices.forEach { device ->
+            sceneDevices.forEach { device ->
                 DeviceControl(device)
             }
         }
@@ -129,7 +133,7 @@ fun SceneRow(scene: Scene, navController: NavController, onDelete: () -> Unit) {
         Column(modifier = Modifier
             .weight(1f)
             .clickable {
-                navController.navigate("sceneDetail/${scene.id}")
+                navController.navigate("sceneDetail/${scene.sceneId}")
             }
         ) {
             Text(text = scene.name, style = MaterialTheme.typography.titleMedium)

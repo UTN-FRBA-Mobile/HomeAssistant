@@ -4,9 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Device(
-    @PrimaryKey(autoGenerate = true) val deviceId: Long = 0,
+data class Scene(
+    @PrimaryKey(autoGenerate = true) val sceneId: Long = 0,
     val name: String,
-    val type: String,
-    var isOn: Boolean = false
 )
