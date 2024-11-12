@@ -41,11 +41,10 @@ fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, o
         ) {
             items(scenes.size) { index ->
                 val scene = scenes[index]
-                SceneItem(scene)
-                Spacer(modifier = Modifier.height(8.dp))
-                SceneRow(scene.scene, navController, onDelete = {
+                SceneItem(scene, navController, onDelete = {
                     onDelete(scene.scene)
                 })
+                Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
             }
         }
@@ -53,55 +52,10 @@ fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, o
 }
 
 @Composable
-fun SceneItem(sceneWithDevices: SceneWithDevices) {
+fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, onDelete: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val scene = sceneWithDevices.scene
     val sceneDevices = sceneWithDevices.devices
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded }
-            .padding(8.dp)
-    ) {
-        Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
-
-        if (expanded) {
-            sceneDevices.forEach { device ->
-                DeviceControl(device)
-            }
-        }
-    }
-}
-
-@Composable
-fun DeviceControl(device: Device) {
-    var isOn by remember { mutableStateOf(false) }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-    ) {
-        Text(
-            text = device.name,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Switch(
-            checked = isOn,
-            onCheckedChange = { isChecked ->
-                isOn = isChecked
-                device.isOn = isChecked  // Sauvegarde l'état du dispositif
-            }
-        )
-    }
-}
-
-@Composable
-fun SceneRow(scene: Scene, navController: NavController, onDelete: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
@@ -125,24 +79,59 @@ fun SceneRow(scene: Scene, navController: NavController, onDelete: () -> Unit) {
         )
     }
 
-    Row(
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { expanded = !expanded }
             .padding(8.dp)
     ) {
-        Column(modifier = Modifier
-            .weight(1f)
-            .clickable {
-                navController.navigate("sceneDetail/${scene.sceneId}")
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
-            Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
+            Column(modifier = Modifier
+                .weight(1f)
+            ) {
+                Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
+            }
+            IconButton(onClick = {
+                showDialog = true  // Show confirmation dialog
+            }) {
+                Icon(Icons.Filled.Delete, contentDescription = "Delete Scene")
+            }
         }
+        if (expanded) {
+            sceneDevices.forEach { device ->
+                DeviceControl(device)
+            }
+        }
+    }
+}
 
-        IconButton(onClick = {
-            showDialog = true  // Show confirmation dialog
-        }) {
-            Icon(Icons.Filled.Delete, contentDescription = "Delete Scene")
-        }
+@Composable
+fun DeviceControl(device: Device) {
+    var isOn by remember { mutableStateOf(device.isOn) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+    ) {
+        Text(
+            text = device.name,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Switch(
+            checked = isOn,
+            onCheckedChange = { isChecked ->
+                isOn = isChecked
+                device.isOn = isChecked  // Sauvegarde l'état du dispositif
+            }
+        )
     }
 }
