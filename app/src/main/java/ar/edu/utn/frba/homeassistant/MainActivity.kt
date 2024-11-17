@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -33,8 +34,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import ar.edu.utn.frba.homeassistant.data.database.AppDatabase
+import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
 import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
@@ -68,6 +68,7 @@ fun HomeAssistantMainScaffold() {
     val navController = rememberNavController()
 
     Scaffold(
+        snackbarHost = { SnackbarHost(SnackbarManager.snackbarHostState) },
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(

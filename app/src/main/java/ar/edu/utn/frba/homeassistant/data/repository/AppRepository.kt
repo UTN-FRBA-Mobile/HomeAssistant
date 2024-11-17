@@ -13,8 +13,10 @@ class AppRepository @Inject constructor(
 ) {
     fun getDevices() = deviceDao.getAll()
 
-    suspend fun addDevice(name: String, type: String) =
-        deviceDao.insert(Device(name = name, type = type))
+    suspend fun getDeviceById(id: Long) = deviceDao.getById(id)
+
+    suspend fun addDevice(id: Long, name: String, type: String) =
+        deviceDao.insert(Device(deviceId = id, name = name, type = type))
 
     suspend fun deleteDevice(device: Device) = deviceDao.delete(device)
 

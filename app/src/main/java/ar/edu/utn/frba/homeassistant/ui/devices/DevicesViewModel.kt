@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
+import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,9 +14,14 @@ class DevicesViewModel @Inject constructor(private val repository: AppRepository
 
     val devices = repository.getDevices()
 
-    fun addDevice(name: String, type: String) {
+    fun addDevice(id: Long, name: String, type: String) {
         viewModelScope.launch {
-            repository.addDevice(name, type)
+            val existingDevice = repository.getDeviceById(id)
+            if (existingDevice != null) {
+                SnackbarManager.showMessage("Device with ID $id already exists.")
+            } else {
+                repository.addDevice(id, name, type)
+            }
         }
     }
 
