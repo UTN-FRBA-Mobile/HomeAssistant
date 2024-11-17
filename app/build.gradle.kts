@@ -83,4 +83,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+
+    // Barcode scanner
+    implementation(libs.play.services.code.scanner)
 }
