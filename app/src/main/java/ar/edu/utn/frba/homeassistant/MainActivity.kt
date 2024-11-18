@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -41,6 +42,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
+import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
+import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
 import ar.edu.utn.frba.homeassistant.utils.GeofenceBroadcastReceiver
 import ar.edu.utn.frba.homeassistant.utils.buildGeofence
@@ -50,6 +54,7 @@ import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
 
+//@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var geofencingClient: GeofencingClient
@@ -123,6 +128,7 @@ fun HomeAssistantMainScaffold() {
     val navController = rememberNavController()
 
     Scaffold(
+        snackbarHost = { SnackbarHost(SnackbarManager.snackbarHostState) },
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -164,18 +170,10 @@ fun HomeAssistantMainScaffold() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("devices") {
-                Text(
-                    text = "Devices",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                DevicesTabContent()
             }
             composable("scenes") {
-                Text(
-                    text = "Scenes",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                ScenesTabContent()
             }
             composable("automations") {
                 Text(
