@@ -18,6 +18,8 @@ class AppRepository @Inject constructor(
     suspend fun addDevice(id: Long, name: String, type: String) =
         deviceDao.insert(Device(deviceId = id, name = name, type = type))
 
+    suspend fun updateDevice(device: Device) = deviceDao.update(device)
+
     suspend fun deleteDevice(device: Device) = deviceDao.delete(device)
 
     fun getScenesWithDevices() = sceneDao.getAllWithDevices()
