@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    #devices {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 10px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .device {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .device:last-child {
+      border-bottom: none;
+    }
+
+    .device img {
+      width: 50px;
+      height: 50px;
+      margin-right: 20px;
+    }
+
+    .device .info {
+      flex-grow: 1;
+    }
+
+    .device .qr-container {
+      margin-left: 20px;
+      text-align: center;
+    }
+
+    .device canvas {
+      margin-top: 10px;
+    }
+
+    .device .switch-container {
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .device .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .device .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .device .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    .device .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    .device input:checked+.slider {
+      background-color: #2196F3;
+    }
+
+    .device input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Device Control</h1>
+  <div id="devices">Loading devices...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const ws = new WebSocket('ws://localhost:3000');
+
+    ws.onmessage = (event) => {
+      const { deviceId, state } = JSON.parse(event.data);
+      const switchElement = document.getElementById(`${deviceId}-switch`);
+      if (switchElement) {
+        switchElement.checked = state;
+      }
+    };
+
+    function toggleDevice(deviceId, element) {
+      const state = element.checked;
+      ws.send(JSON.stringify({ deviceId, state }));
+    }
+
+    async function loadDevices() {
+      try {
+        const response = await fetch('/devices');
+        const devices = await response.json();
+        console.log(devices);
+
+        const devicesContainer = document.getElementById('devices');
+        devicesContainer.innerHTML = ''; // Clear loading text
+
+        devices.forEach((device) => {
+          const deviceElement = document.createElement('div');
+          deviceElement.classList.add('device');
+          deviceElement.innerHTML = `
+        <img src="${device.image}" alt="${device.name}">
+        <div class="info">
+          <h3>${device.name}</h3>
+          <p>Type: ${device.type}</p>
+        </div>
+        <div class="switch-container">
+          <label class="switch">
+            <input type="checkbox" ${device.state ? "checked" : ""} id="${device.id}-switch" onchange="toggleDevice('${device.id}', this)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="qr-container">
+        </div>
+      `;
+
+          const qrContainer = deviceElement.querySelector('.qr-container');
+          const canvas = document.createElement('canvas'); // Create a canvas element
+          qrContainer.appendChild(canvas); // Append it to the QR container
+
+          // Generate QR Code
+          const qrData = JSON.stringify({
+            id: device.id,
+            name: device.name,
+            type: device.type,
+          });
+          QRCode.toCanvas(canvas, qrData, { width: 100, margin: 2 }); // Render QR code in the canvas
+
+          devicesContainer.appendChild(deviceElement); // Add device element to the page
+        });
+      } catch (error) {
+        console.error('Failed to load devices:', error);
+      }
+    }
+
+
+    // Load devices on page load
+    loadDevices();
+  </script>
+</body>
+
+</html>

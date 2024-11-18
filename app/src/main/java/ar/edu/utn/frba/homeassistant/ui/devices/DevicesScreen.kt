@@ -15,7 +15,12 @@ import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DevicesScreen(navController: NavController, devices: List<Device>, onDelete: (Device) -> Unit) {
+fun DevicesScreen(
+    navController: NavController,
+    devices: List<Device>,
+    onDelete: (Device) -> Unit,
+    onToggle: (Device, Boolean) -> Unit
+) {
 
     Scaffold(
         topBar = {
@@ -41,7 +46,7 @@ fun DevicesScreen(navController: NavController, devices: List<Device>, onDelete:
                 val device = devices[index]
                 DeviceRow(device, navController, onDelete = {
                     onDelete(device)
-                })
+                }, onToggle = { onToggle(device, it)  })
                 HorizontalDivider()
             }
         }
@@ -49,7 +54,12 @@ fun DevicesScreen(navController: NavController, devices: List<Device>, onDelete:
 }
 
 @Composable
-fun DeviceRow(device: Device, navController: NavController, onDelete: () -> Unit) {
+fun DeviceRow(
+    device: Device,
+    navController: NavController,
+    onDelete: () -> Unit,
+    onToggle: (Boolean) -> Unit
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
@@ -87,6 +97,13 @@ fun DeviceRow(device: Device, navController: NavController, onDelete: () -> Unit
             Text(text = device.name, style = MaterialTheme.typography.titleMedium)
             Text(text = device.type, style = MaterialTheme.typography.bodyMedium)
         }
+
+        Switch(
+            checked = device.isOn,
+            onCheckedChange = {
+                onToggle(it)
+            }
+        )
 
         IconButton(onClick = {
             showDialog = true  // Show confirmation dialog
