@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.ClockAutomationForm
@@ -31,19 +32,22 @@ import ar.edu.utn.frba.homeassistant.ui.automations.forms.GeolocationAutomationF
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.ShakeAutomationForm
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.components.DropdownMenuComponent
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.components.MultiSelectDropdownComponent
+import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
 fun AddAutomationScreen(
     navController: NavHostController,
     onCreate: (Set<Scene>) -> (IAutomation) -> Unit,
-    scenes: List<Scene>
+    scenes: List<Scene>,
+    getCurrentCoordinates: GetCurrentCoordinates
 ) {
     val context = LocalContext.current
 
     AutomationForm(
         goBack = { navController.popBackStack() },
         scenes = scenes,
-        onCreate = onCreate
+        onCreate = onCreate,
+        getCurrentCoordinates = getCurrentCoordinates
     )
 }
 
@@ -52,7 +56,8 @@ fun AddAutomationScreen(
 fun AutomationForm(
     goBack: () -> Unit,
     scenes: List<Scene>,
-    onCreate: (Set<Scene>) -> (IAutomation) -> Unit
+    onCreate: (Set<Scene>) -> (IAutomation) -> Unit,
+    getCurrentCoordinates: GetCurrentCoordinates
 ) {
     var selectedAutomation by remember { mutableStateOf("Clock Automation") }
     var selectedScenes by remember { mutableStateOf(setOf<Scene>()) } // Estado para escenas seleccionadas
@@ -107,7 +112,7 @@ fun AutomationForm(
                 // Display fields based on selected automation
                 when (selectedAutomation) {
                     "Clock Automation" -> ClockAutomationForm(onCreate(selectedScenes))
-                    "Geolocation Automation" -> GeolocationAutomationForm()
+                    "Geolocation Automation" -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates)
                     "Shake Automation" -> ShakeAutomationForm()
                 }
             }
@@ -135,6 +140,7 @@ fun AddAutomationScreenPreview() {
         scenes = emptyList(),
         onCreate = {
             { }
-        }
+        },
+        getCurrentCoordinates = { }
     )
 }
