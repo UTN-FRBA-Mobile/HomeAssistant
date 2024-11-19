@@ -4,13 +4,17 @@ import androidx.lifecycle.LiveData
 import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import javax.inject.Inject
 
 class AppRepository @Inject constructor(
@@ -61,28 +65,48 @@ class AppRepository @Inject constructor(
 
     fun getClockAutomationsWithScenes() = automationDao.getAllClockWithScenes()
     fun getGeolocationAutomationsWithScenes() = automationDao.getAllGeolocationWithScenes()
+    fun getShakeAutomationsWithScenes() = automationDao.getAllShakeWithScenes()
 
-    private suspend fun insertAutomationScenesCrossRef(id: Long, automationWithScenes: IAutomationWithScenes) {
-        automationWithScenes.scenes.forEach {
+
+    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
+        println(clockAutomationWithScenes)
+        val inserted = automationDao.insert(clockAutomationWithScenes.automation)
+        println(inserted)
+        clockAutomationWithScenes.scenes.forEach {
             println(it)
             automationDao.insertAutomationSceneCrossRef(
-                ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef(
-                    id, //
-                    it.sceneId
+                ClockAutomationSceneCrossRef(
+                    it.sceneId,
+                    inserted //
                 )
             )
         }
     }
 
-    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
-        println(clockAutomationWithScenes)
-        val id = automationDao.insert(clockAutomationWithScenes.automation)
-        insertAutomationScenesCrossRef(id, clockAutomationWithScenes)
-    }
-
     suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes) {
         println(geolocationAutomationWithScenes)
         val id = automationDao.insert(geolocationAutomationWithScenes.automation)
-        insertAutomationScenesCrossRef(id, geolocationAutomationWithScenes)
+        geolocationAutomationWithScenes.scenes.forEach {
+            println(it)
+            automationDao.insertAutomationSceneCrossRef(
+                GeolocationAutomationSceneCrossRef(
+                    it.sceneId, id
+                )
+            )
+        }
+    }
+
+    suspend fun addAutomation(shakeAutomationWithScenes: ShakeAutomationWithScenes) {
+        println(shakeAutomationWithScenes)
+        val id = automationDao.insert(shakeAutomationWithScenes.automation)
+        shakeAutomationWithScenes.scenes.forEach {
+            println(it)
+            automationDao.insertAutomationSceneCrossRef(
+                ShakeAutomationSceneCrossRef(
+                    it.sceneId,
+                    id
+                )
+            )
+        }
     }
 }

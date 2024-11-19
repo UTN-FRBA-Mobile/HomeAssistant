@@ -16,6 +16,7 @@ fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), get
     val navController = rememberNavController()
     val clockAutomations by viewModel.clockAutomations.observeAsState(emptyList())
     val geolocationAutomations by viewModel.geolocationAutomations.observeAsState(emptyList())
+    val shakeAutomations by viewModel.shakeAutomations.observeAsState(emptyList())
     val scenes by viewModel.scenes.observeAsState(emptyList())
 
     NavHost(navController, startDestination = "automationsList") {
@@ -30,7 +31,7 @@ fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), get
             AddAutomationScreen(navController, viewModel::addAutomation, scenes = scenes, getCurrentCoordinates = getCurrentCoordinates)
         }
         composable("automationsList") {
-            val automationsWithScenes = clockAutomations + geolocationAutomations
+            val automationsWithScenes = clockAutomations + geolocationAutomations + shakeAutomations
             AutomationsScreen(navController, automationsWithScenes, viewModel::deleteAutomation, viewModel::toggleAutomation)
         }
     }

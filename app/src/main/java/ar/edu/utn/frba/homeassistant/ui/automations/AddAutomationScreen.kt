@@ -113,7 +113,7 @@ fun AutomationForm(
                 when (selectedAutomation) {
                     "Clock Automation" -> ClockAutomationForm(onCreate(selectedScenes))
                     "Geolocation Automation" -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates, onCreate = onCreate(selectedScenes))
-                    "Shake Automation" -> ShakeAutomationForm()
+                    "Shake Automation" -> ShakeAutomationForm(onCreate = onCreate(selectedScenes))
                 }
             }
 //            Column(

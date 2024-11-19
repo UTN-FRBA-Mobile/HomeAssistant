@@ -22,6 +22,7 @@ class AutomationsViewModel @Inject constructor(
 
     val clockAutomations = repository.getClockAutomationsWithScenes();
     val geolocationAutomations = repository.getGeolocationAutomationsWithScenes();
+    val shakeAutomations = repository.getShakeAutomationsWithScenes();
     val scenes = repository.getScenes();
 //
 //    fun addDevice(id: Long, name: String, type: String) {
@@ -62,10 +63,6 @@ class AutomationsViewModel @Inject constructor(
 
     fun addAutomation(scenes: Set<Scene>): (IAutomation) -> Unit {
         return fun(automation: IAutomation) {
-//            viewModelScope.launch {
-//                SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
-//            }
-
             when(automation.type){
                 "CLOCK" -> {
                     val clockAutomation = automation as ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
@@ -80,6 +77,14 @@ class AutomationsViewModel @Inject constructor(
                     val geolocationAutomationWithScenes = ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes(scenes.toList(), geolocationAutomation)
                     viewModelScope.launch {
                         repository.addAutomation(geolocationAutomationWithScenes)
+                        SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
+                    }
+                }
+                "SHAKE" -> {
+                    val shakeAutomation = automation as ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
+                    val shakeAutomationWithScenes = ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes(scenes.toList(), shakeAutomation)
+                    viewModelScope.launch {
+                        repository.addAutomation(shakeAutomationWithScenes)
                         SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
                     }
                 }

@@ -42,6 +42,8 @@ fun AutomationsScreen(
     onToggle: (IAutomationWithScenes, Boolean) -> Unit
 ) {
 
+    println("AutomationsScreen: $automations")
+
     Scaffold(
         topBar = {
             TopAppBar(

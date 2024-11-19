@@ -13,9 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 
 @Composable
-fun ShakeAutomationForm() {
+fun ShakeAutomationForm(
+    onCreate: (IAutomation) -> Unit,
+) {
     var shakeIntensity by remember { mutableStateOf(0f) }
 
     Column(
@@ -36,7 +40,14 @@ fun ShakeAutomationForm() {
 
         Column {
             Button(
-                onClick = { /* Save logic */ },
+                onClick = {
+                    val automation = ShakeAutomation(
+                        automationId = null,
+                        name = "Shake Automation ${shakeIntensity.toInt()}",
+                        threshold = shakeIntensity.toInt()
+                    )
+                    onCreate(automation)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Save")
