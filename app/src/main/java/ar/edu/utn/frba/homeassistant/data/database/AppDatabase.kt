@@ -29,7 +29,7 @@ import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
     ClockDaysCrossRef::class,
     GeolocationAutomation::class,
     ShakeAutomation::class
- ], version = 9)
+ ], version = 10)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao
     abstract fun sceneDao(): SceneDao

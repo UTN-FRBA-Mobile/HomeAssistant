@@ -28,12 +28,12 @@ interface IAutomation {
 data class ClockAutomation (
     @PrimaryKey(autoGenerate = true)
     override val automationId: Long?,
-    val timeTurnOn: String,
-    val timeTurnOff: String,
+    val time: String,
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean,
-    override val type: String = "CLOCK"
+    override val type: String = "CLOCK",
+    val shouldTurnOn: Boolean
 ): IAutomation
 
 @Entity(primaryKeys = ["automationId", "day"])

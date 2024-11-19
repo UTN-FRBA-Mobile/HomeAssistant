@@ -37,8 +37,8 @@ import java.util.Calendar
 fun ClockAutomationForm(
     onCreate: (IAutomation) -> Unit
 ) {
-    var startTime by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf("") }
+    var shouldTurnOn by remember { mutableStateOf(true) }
 
     val selectedDays = remember {
         mutableStateMapOf( // Estado para días seleccionados
@@ -76,33 +76,29 @@ fun ClockAutomationForm(
     ) {
         Column {
             OutlinedTextField(
-                value = startTime,
+                value = time,
                 onValueChange = { },
-                label = { Text("Start Time") },
+                label = { Text("Trigger time") },
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    IconButton(onClick = { showTimePicker { startTime = it } }) {
+                    IconButton(onClick = { showTimePicker { time = it } }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Select Start Time")
-                    }
-                }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = endTime,
-                onValueChange = { },
-                label = { Text("End Time") },
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(onClick = { showTimePicker { endTime = it } }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Select End Time")
                     }
                 }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = shouldTurnOn,
+                    onCheckedChange = { shouldTurnOn = it }
+                )
+                Text(text = "Should turn on?")
+            }
 
             Text(text = "Select Days of the Week")
 
@@ -151,11 +147,11 @@ fun ClockAutomationForm(
                     )
                     val automation = ClockAutomation(
                         automationId = null,
-                        timeTurnOn = startTime,
-                        timeTurnOff = endTime,
+                        time = time,
                         isOn = false,
-                        name = "[${name}] - ${startTime} - ${endTime}",
+                        name = "[${name}] - ${time}",
                         enabled = true,
+                        shouldTurnOn = true
                     )
                     onCreate(automation as IAutomation)
                 },
