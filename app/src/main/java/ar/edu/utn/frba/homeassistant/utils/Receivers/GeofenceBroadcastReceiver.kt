@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.homeassistant.utils
+package ar.edu.utn.frba.homeassistant.utils.Receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,11 +1,16 @@
 package ar.edu.utn.frba.homeassistant
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -45,7 +50,7 @@ import ar.edu.utn.frba.homeassistant.ui.automations.AutomationsTabContent
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
 import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
-import ar.edu.utn.frba.homeassistant.utils.GeofenceBroadcastReceiver
+import ar.edu.utn.frba.homeassistant.utils.Receivers.GeofenceBroadcastReceiver
 import ar.edu.utn.frba.homeassistant.utils.buildGeofence
 import ar.edu.utn.frba.homeassistant.utils.buildGeofenceRequest
 import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
@@ -68,6 +73,31 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val alarmManager = this.getSystemService(AlarmManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            when {
+                // If permission is granted, proceed with scheduling exact alarms.
+                alarmManager.canScheduleExactAlarms() -> {
+                    println("Can schedule exact alarms")
+                }
+                else -> {
+                    // Ask users to go to exact alarm page in system settings.
+                    this.startActivity(Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+                }
+            }
+        }
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // TODO: ATM you will need to activate notifications manually. We should add an alert.
+            val channelId = "ALARM_AUTOMATIONS"
+            val channelName = "Automations Notifications"
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        } else {
+
+        }
+
 
         fun getCurrentCoordinates(onSuccess: (Double, Double) -> Unit){
             if (ActivityCompat.checkSelfPermission(

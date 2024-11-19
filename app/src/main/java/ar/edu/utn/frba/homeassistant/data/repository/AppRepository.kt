@@ -68,7 +68,7 @@ class AppRepository @Inject constructor(
     fun getShakeAutomationsWithScenes() = automationDao.getAllShakeWithScenes()
 
 
-    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
+    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes): Long {
         println(clockAutomationWithScenes)
         val inserted = automationDao.insert(clockAutomationWithScenes.automation)
         println(inserted)
@@ -81,9 +81,10 @@ class AppRepository @Inject constructor(
                 )
             )
         }
+        return inserted;
     }
 
-    suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes) {
+    suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes): Long {
         println(geolocationAutomationWithScenes)
         val id = automationDao.insert(geolocationAutomationWithScenes.automation)
         geolocationAutomationWithScenes.scenes.forEach {
@@ -94,9 +95,10 @@ class AppRepository @Inject constructor(
                 )
             )
         }
+        return id;
     }
 
-    suspend fun addAutomation(shakeAutomationWithScenes: ShakeAutomationWithScenes) {
+    suspend fun addAutomation(shakeAutomationWithScenes: ShakeAutomationWithScenes): Long {
         println(shakeAutomationWithScenes)
         val id = automationDao.insert(shakeAutomationWithScenes.automation)
         shakeAutomationWithScenes.scenes.forEach {
@@ -108,5 +110,6 @@ class AppRepository @Inject constructor(
                 )
             )
         }
+        return id
     }
 }
