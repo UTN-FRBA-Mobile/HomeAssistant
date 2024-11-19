@@ -1,11 +1,13 @@
 package ar.edu.utn.frba.homeassistant.ui.automations
 
 import android.app.TimePickerDialog
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,20 +44,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import java.util.Calendar
 
 @Composable
 fun AddAutomationScreen(
     navController: NavHostController,
-    onCreate: (Long, String, String) -> Unit,
+    onCreate: (Set<Scene>) -> (IAutomation) -> Unit,
     scenes: List<Scene>
 ) {
     val context = LocalContext.current
 
     AutomationForm(
         goBack = { navController.popBackStack() },
-        scenes = scenes
+        scenes = scenes,
+        onCreate = onCreate
     )
 }
 
@@ -64,16 +70,17 @@ fun AddAutomationScreen(
 fun AutomationForm(
     goBack: () -> Unit,
     scenes: List<Scene>,
+    onCreate: (Set<Scene>) -> (IAutomation) -> Unit
 ) {
     var selectedAutomation by remember { mutableStateOf("Clock Automation") }
-    var selectedScenes by remember { mutableStateOf(setOf<String>()) } // Estado para escenas seleccionadas
+    var selectedScenes by remember { mutableStateOf(setOf<Scene>()) } // Estado para escenas seleccionadas
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Add new automation") },
                 navigationIcon = {
-                    IconButton(onClick = {goBack()}) {
+                    IconButton(onClick = { goBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -83,20 +90,21 @@ fun AutomationForm(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement =  Arrangement.SpaceBetween
+                .fillMaxHeight()
+                .padding(16.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .padding(paddingValues)
+                modifier = Modifier.padding(paddingValues)
             ) {
 
                 // Dropdown for selecting automation type
                 DropdownMenuComponent(
                     selectedOption = selectedAutomation,
-                    options = listOf("Clock Automation", "Geolocation Automation", "Shake Automation"),
+                    options = listOf(
+                        "Clock Automation",
+                        "Geolocation Automation",
+                        "Shake Automation"
+                    ),
                     onOptionSelected = { selectedAutomation = it },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -104,51 +112,56 @@ fun AutomationForm(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Dropdown for selecting scenes
-                MultiSelectDropdownComponent(
-                    options = scenes.map { it.name },
+                MultiSelectDropdownComponent<Scene>(
+                    options = scenes,
                     selectedOptions = selectedScenes,
                     onOptionSelected = { selectedScenes = it },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    getOptionLabel = { it.name }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Display fields based on selected automation
                 when (selectedAutomation) {
-                    "Clock Automation" -> ClockAutomationForm()
+                    "Clock Automation" -> ClockAutomationForm(onCreate(selectedScenes))
                     "Geolocation Automation" -> GeolocationAutomationForm()
                     "Shake Automation" -> ShakeAutomationForm()
                 }
             }
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-            ) {
-                Button(
-                    onClick = { /* Save logic */ },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Save")
-                }
-            }
+//            Column(
+//                modifier = Modifier
+//                    .padding(paddingValues)
+//            ) {
+//                Button(
+//                    onClick = { /* Save logic */ },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text(text = "Save")
+//                }
+//            }
         }
     }
 }
 
 @Composable
-fun ClockAutomationForm() {
+fun ClockAutomationForm(
+    onCreate: (IAutomation) -> Unit
+) {
     var startTime by remember { mutableStateOf("") }
     var endTime by remember { mutableStateOf("") }
 
-    val selectedDays = remember { mutableStateMapOf( // Estado para días seleccionados
-        "Monday" to false,
-        "Tuesday" to false,
-        "Wednesday" to false,
-        "Thursday" to false,
-        "Friday" to false,
-        "Saturday" to false,
-        "Sunday" to false
-    )}
+    val selectedDays = remember {
+        mutableStateMapOf( // Estado para días seleccionados
+            "Monday" to false,
+            "Tuesday" to false,
+            "Wednesday" to false,
+            "Thursday" to false,
+            "Friday" to false,
+            "Saturday" to false,
+            "Sunday" to false
+        )
+    }
 
 
     val context = LocalContext.current
@@ -167,67 +180,102 @@ fun ClockAutomationForm() {
         ).show()
     }
 
-    Column {
-        OutlinedTextField(
-            value = startTime,
-            onValueChange = { },
-            label = { Text("Start Time") },
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = { showTimePicker { startTime = it } }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Select Start Time")
-                }
-            }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = endTime,
-            onValueChange = { },
-            label = { Text("End Time") },
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = { showTimePicker { endTime = it } }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Select End Time")
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Select Days of the Week")
-
-        // Grid layout for days of the week
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(modifier = Modifier.weight(1f)) {
-                selectedDays.keys.filterIndexed { index, _ -> index % 2 == 0 }.forEachIndexed { index, day ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = selectedDays[day] ?: false,
-                            onCheckedChange = { selectedDays[day] = it }
-                        )
-                        Text(text = day)
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState()) // TODO: Fix!
+            .fillMaxHeight()
+    ) {
+        Column {
+            OutlinedTextField(
+                value = startTime,
+                onValueChange = { },
+                label = { Text("Start Time") },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    IconButton(onClick = { showTimePicker { startTime = it } }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Select Start Time")
                     }
                 }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                selectedDays.keys.filterIndexed { index, _ -> index % 2 != 0 }.forEachIndexed { index, day ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = selectedDays[day] ?: false,
-                            onCheckedChange = { selectedDays[day] = it }
-                        )
-                        Text(text = day)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = endTime,
+                onValueChange = { },
+                label = { Text("End Time") },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    IconButton(onClick = { showTimePicker { endTime = it } }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Select End Time")
                     }
                 }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Select Days of the Week")
+
+            // Grid layout for days of the week
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    selectedDays.keys.filterIndexed { index, _ -> index % 2 == 0 }
+                        .forEachIndexed { index, day ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = selectedDays[day] ?: false,
+                                    onCheckedChange = { selectedDays[day] = it }
+                                )
+                                Text(text = day)
+                            }
+                        }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    selectedDays.keys.filterIndexed { index, _ -> index % 2 != 0 }
+                        .forEachIndexed { index, day ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = selectedDays[day] ?: false,
+                                    onCheckedChange = { selectedDays[day] = it }
+                                )
+                                Text(text = day)
+                            }
+                        }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = {
+
+                    val name = selectedDays.entries.filter { it.value }.map { it.key.slice(IntRange(0, 1)) }.joinToString(
+                        ", "
+                    )
+                    val automation = ClockAutomation(
+                        automationId = null,
+                        timeTurnOn = startTime,
+                        timeTurnOff = endTime,
+                        isOn = false,
+                        name = "[${name}] - ${startTime} - ${endTime}",
+                        enabled = true,
+                    )
+                    onCreate(automation as IAutomation)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Save")
             }
         }
     }
 }
-
-
 
 
 @Composable
@@ -235,45 +283,81 @@ fun GeolocationAutomationForm() {
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
 
-    OutlinedTextField(
-        value = latitude,
-        onValueChange = { latitude = it },
-        label = { Text("Latitude") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier.fillMaxWidth()
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-
-    OutlinedTextField(
-        value = longitude,
-        onValueChange = { longitude = it },
-        label = { Text("Longitude") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier.fillMaxWidth()
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Button(
-        onClick = { /* Auto-set coordinates logic */ },
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = "Use Current Location")
+        Column(
+        ) {
+            OutlinedTextField(
+                value = latitude,
+                onValueChange = { latitude = it },
+                label = { Text("Latitude") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = longitude,
+                onValueChange = { longitude = it },
+                label = { Text("Longitude") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { /* Auto-set coordinates logic */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Use Current Location")
+            }
+        }
+
+        Column(
+        ) {
+            Button(
+                onClick = { /* Save logic */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Save")
+            }
+        }
     }
+
+
 }
 
 @Composable
 fun ShakeAutomationForm() {
     var shakeIntensity by remember { mutableStateOf(0f) }
 
-    Text(text = "Shake Intensity")
-    Slider(
-        value = shakeIntensity,
-        onValueChange = { shakeIntensity = it },
-        valueRange = 0f..10f,
-        steps = 9,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Text(text = "Selected Intensity: ${shakeIntensity.toInt()}")
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column {
+            Text(text = "Shake Intensity")
+            Slider(
+                value = shakeIntensity,
+                onValueChange = { shakeIntensity = it },
+                valueRange = 0f..10f,
+                steps = 9,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(text = "Selected Intensity: ${shakeIntensity.toInt()}")
+        }
+
+        Column {
+            Button(
+                onClick = { /* Save logic */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Save")
+            }
+        }
+    }
 }
 
 @Composable
@@ -312,9 +396,11 @@ fun DropdownMenuComponent(
                         expanded = false
                     },
                     text = {
-                        Text(text = option, modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp))
+                        Text(
+                            text = option, modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
                     }
                 )
             }
@@ -323,17 +409,22 @@ fun DropdownMenuComponent(
 }
 
 @Composable
-fun MultiSelectDropdownComponent(
-    options: List<String>,
-    selectedOptions: Set<String>,
-    onOptionSelected: (Set<String>) -> Unit,
-    modifier: Modifier = Modifier
+fun <T> MultiSelectDropdownComponent(
+    options: List<T>,
+    selectedOptions: Set<T>,
+    onOptionSelected: (Set<T>) -> Unit,
+    modifier: Modifier = Modifier,
+    getOptionLabel: (T) -> String = { it.toString() }
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    println("Selected options: $options")
+
     Box(modifier = modifier) {
         OutlinedTextField(
-            value = if (selectedOptions.isEmpty()) "Select Scenes" else selectedOptions.joinToString(", "),
+            value = if (selectedOptions.isEmpty()) "Select Scenes" else selectedOptions.joinToString(
+                ", ", transform = getOptionLabel
+            ),
             onValueChange = { },
             label = { Text("Scenes") },
             readOnly = true,
@@ -366,7 +457,7 @@ fun MultiSelectDropdownComponent(
                                 checked = isSelected,
                                 onCheckedChange = null // Prevents event bubbling
                             )
-                            Text(text = option)
+                            Text(text = getOptionLabel(option))
                         }
                     }
                 )
@@ -376,13 +467,14 @@ fun MultiSelectDropdownComponent(
 }
 
 
-
-
 @Preview
 @Composable
 fun AddAutomationScreenPreview() {
     AutomationForm(
         goBack = {},
         scenes = emptyList(),
+        onCreate = {
+            { }
+        }
     )
 }

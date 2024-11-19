@@ -30,16 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ar.edu.utn.frba.homeassistant.data.model.Automation
-import ar.edu.utn.frba.homeassistant.data.model.Scene
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationsScreen(
     navController: NavController,
-    automations: List<Automation>,
-    onDelete: (Automation) -> Unit,
-    onToggle: (Automation, Boolean) -> Unit
+    automations: List<IAutomationWithScenes>,
+    onDelete: (IAutomationWithScenes) -> Unit,
+    onToggle: (IAutomationWithScenes, Boolean) -> Unit
 ) {
 
     Scaffold(
@@ -75,7 +75,7 @@ fun AutomationsScreen(
 
 @Composable
 fun AutomationRow(
-    automation: Automation,
+    automation: IAutomationWithScenes,
     navController: NavController,
     onDelete: () -> Unit,
     onToggle: (Boolean) -> Unit
@@ -98,8 +98,8 @@ fun AutomationRow(
                     Text("Cancel")
                 }
             },
-            title = { Text("Delete Device") },
-            text = { Text("Are you sure you want to delete this device?") }
+            title = { Text("Delete Automation") },
+            text = { Text("Are you sure you want to delete this automation?") }
         )
     }
 
@@ -111,15 +111,15 @@ fun AutomationRow(
         Column(modifier = Modifier
             .weight(1f)
             .clickable {
-                navController.navigate("deviceDetail/${automation.automationId}")
+                navController.navigate("automationDetail/${automation.automation.automationId}")
             }
         ) {
-            Text(text = automation.name, style = MaterialTheme.typography.titleMedium)
-            Text(text = automation.name, style = MaterialTheme.typography.bodyMedium)
+            Text(text = automation.automation.name, style = MaterialTheme.typography.titleMedium)
+            Text(text = automation.scenes.joinToString { it.name }, style = MaterialTheme.typography.titleSmall)
         }
 
         Switch(
-            checked = automation.isOn,
+            checked = automation.automation.isOn,
             onCheckedChange = {
                 onToggle(it)
             }
@@ -128,7 +128,7 @@ fun AutomationRow(
         IconButton(onClick = {
             showDialog = true  // Show confirmation dialog
         }) {
-            Icon(Icons.Filled.Delete, contentDescription = "Delete Device")
+            Icon(Icons.Filled.Delete, contentDescription = "Delete Automation")
         }
     }
 }

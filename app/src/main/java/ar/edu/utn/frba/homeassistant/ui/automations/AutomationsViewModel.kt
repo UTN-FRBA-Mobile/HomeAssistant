@@ -2,8 +2,10 @@ package ar.edu.utn.frba.homeassistant.ui.automations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.utn.frba.homeassistant.data.model.Automation
 import ar.edu.utn.frba.homeassistant.data.model.Device
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.network.UdpService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
@@ -51,16 +53,34 @@ class AutomationsViewModel @Inject constructor(
         }
     }
 
-    fun toggleAutomation(automation: Automation, b: Boolean) {
+    fun toggleAutomation(automation: IAutomationWithScenes, b: Boolean) {
         viewModelScope.launch {
             SnackbarManager.showMessage("Automation toggled.")
         }
     }
 
-    fun addAutomation(l: Long, s: String, s1: String) {
-        viewModelScope.launch {
-            SnackbarManager.showMessage("Automation added.")
-        }
+    fun addAutomation(scenes: Set<Scene>): (IAutomation) -> Unit {
+        return fun(automation: IAutomation) {
+//            viewModelScope.launch {
+//                SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
+//            }
 
+            when(automation.type){
+                "CLOCK" -> {
+                    val clockAutomation = automation as ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+                    val clockAutomationWithScenes = ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes(scenes.toList(), clockAutomation)
+                    viewModelScope.launch {
+                        repository.addAutomation(clockAutomationWithScenes)
+                        SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
+                    }
+                }
+                else -> {
+                    viewModelScope.launch {
+                        SnackbarManager.showMessage("Automation type not supported.")
+                    }
+                }
+            }
+        }
     }
+
 }

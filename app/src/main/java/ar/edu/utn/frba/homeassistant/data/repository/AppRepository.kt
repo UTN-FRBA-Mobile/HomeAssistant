@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
-import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
@@ -56,5 +56,19 @@ class AppRepository @Inject constructor(
         }
     }
 
-    fun getAutomations() = automationDao.getAll()
+    fun getAutomations(): LiveData<List<ClockAutomationWithScenes>> = automationDao.getAllWithScenes()
+
+    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
+        println(clockAutomationWithScenes)
+        val id = automationDao.insert(clockAutomationWithScenes.automation)
+        clockAutomationWithScenes.scenes.forEach {
+            println(it)
+            automationDao.insertAutomationSceneCrossRef(
+                ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef(
+                    id, //
+                    it.sceneId
+                )
+            )
+        }
+    }
 }

@@ -2,28 +2,35 @@ package ar.edu.utn.frba.homeassistant.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
-import ar.edu.utn.frba.homeassistant.data.model.Automation
-import ar.edu.utn.frba.homeassistant.data.model.Clock
+import androidx.room.Transaction
+import ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 
 @Dao
 interface AutomationDao {
-    @Query("SELECT * FROM automation")
-    fun getAll(): LiveData<List<Automation>>
+    @Query("SELECT * FROM clockautomation")
+    fun getAll(): LiveData<List<ClockAutomation>>
 
-    @Query("SELECT * FROM clock")
-    fun getClockAutomations(): LiveData<List<Clock>>
+    @Transaction
+    @Query("SELECT * FROM clockautomation")
+    fun getAllWithScenes(): LiveData<List<ClockAutomationWithScenes>>
+
 
 //
 //    @Transaction
 //    @Query("SELECT * FROM scene")
 //    fun getAllWithDevices(): LiveData<List<SceneWithDevices>>
 //
-//    @Insert
-//    suspend fun insert(scene: Scene): Long
-//
-//    @Insert
-//    suspend fun insertSceneDeviceCrossRef(sceneDeviceCrossRef: SceneDeviceCrossRef)
+    @Insert
+    suspend fun insert(automation: ClockAutomation): Long
+
+    @Insert
+    suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: AutomationSceneCrossRef)
 //
 //    @Update
 //    suspend fun update(scene: Scene)
