@@ -151,7 +151,14 @@ fun ClockAutomationForm(
                         isOn = false,
                         name = "[${name}] - ${time}",
                         enabled = true,
-                        shouldTurnOn = true
+                        shouldTurnOn = shouldTurnOn,
+                        monday = selectedDays["Monday"] ?: false,
+                        tuesday = selectedDays["Tuesday"] ?: false,
+                        wednesday = selectedDays["Wednesday"] ?: false,
+                        thursday = selectedDays["Thursday"] ?: false,
+                        friday = selectedDays["Friday"] ?: false,
+                        saturday = selectedDays["Saturday"] ?: false,
+                        sunday = selectedDays["Sunday"] ?: false
                     )
                     onCreate(automation as IAutomation)
                 },

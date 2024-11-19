@@ -7,7 +7,6 @@ import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ClockDaysCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
@@ -26,10 +25,9 @@ import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
     ClockAutomationSceneCrossRef::class,
     ShakeAutomationSceneCrossRef::class,
     GeolocationAutomationSceneCrossRef::class,
-    ClockDaysCrossRef::class,
     GeolocationAutomation::class,
     ShakeAutomation::class
- ], version = 10)
+ ], version = 11)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao
     abstract fun sceneDao(): SceneDao

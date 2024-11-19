@@ -6,16 +6,6 @@ import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-enum class DAY_OF_WEEK {
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY,
-    SUNDAY
-}
-
 interface IAutomation {
     val automationId: Long?
     val name: String
@@ -33,14 +23,15 @@ data class ClockAutomation (
     override val name: String,
     override val enabled: Boolean,
     override val type: String = "CLOCK",
-    val shouldTurnOn: Boolean
+    val shouldTurnOn: Boolean,
+    val monday: Boolean,
+    val tuesday: Boolean,
+    val wednesday: Boolean,
+    val thursday: Boolean,
+    val friday: Boolean,
+    val saturday: Boolean,
+    val sunday: Boolean
 ): IAutomation
-
-@Entity(primaryKeys = ["automationId", "day"])
-data class ClockDaysCrossRef(
-    val automationId: Long,
-    val day: DAY_OF_WEEK
-)
 
 interface IAutomationWithScenes {
     val scenes : List<Scene>
