@@ -20,7 +20,8 @@ class AutomationsViewModel @Inject constructor(
     private val udpService: UdpService
 ) : ViewModel() {
 
-    val automations = repository.getAutomations();
+    val clockAutomations = repository.getClockAutomationsWithScenes();
+    val geolocationAutomations = repository.getGeolocationAutomationsWithScenes();
     val scenes = repository.getScenes();
 //
 //    fun addDevice(id: Long, name: String, type: String) {
@@ -71,6 +72,14 @@ class AutomationsViewModel @Inject constructor(
                     val clockAutomationWithScenes = ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes(scenes.toList(), clockAutomation)
                     viewModelScope.launch {
                         repository.addAutomation(clockAutomationWithScenes)
+                        SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
+                    }
+                }
+                "GEOLOCATION" -> {
+                    val geolocationAutomation = automation as ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+                    val geolocationAutomationWithScenes = ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes(scenes.toList(), geolocationAutomation)
+                    viewModelScope.launch {
+                        repository.addAutomation(geolocationAutomationWithScenes)
                         SnackbarManager.showMessage("${automation.name} added for scenes ${scenes.map { it.name }.joinToString { it }}.")
                     }
                 }

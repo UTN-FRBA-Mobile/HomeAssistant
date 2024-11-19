@@ -14,7 +14,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 @Composable
 fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), getCurrentCoordinates: GetCurrentCoordinates) {
     val navController = rememberNavController()
-    val automations by viewModel.automations.observeAsState(emptyList())
+    val clockAutomations by viewModel.clockAutomations.observeAsState(emptyList())
+    val geolocationAutomations by viewModel.geolocationAutomations.observeAsState(emptyList())
     val scenes by viewModel.scenes.observeAsState(emptyList())
 
     NavHost(navController, startDestination = "automationsList") {
@@ -29,7 +30,8 @@ fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), get
             AddAutomationScreen(navController, viewModel::addAutomation, scenes = scenes, getCurrentCoordinates = getCurrentCoordinates)
         }
         composable("automationsList") {
-            AutomationsScreen(navController, automations, viewModel::deleteAutomation, viewModel::toggleAutomation)
+            val automationsWithScenes = clockAutomations + geolocationAutomations
+            AutomationsScreen(navController, automationsWithScenes, viewModel::deleteAutomation, viewModel::toggleAutomation)
         }
     }
 }

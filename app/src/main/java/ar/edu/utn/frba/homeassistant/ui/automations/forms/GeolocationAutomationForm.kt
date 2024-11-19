@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,41 +25,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.FusedLocationProviderClient
 
-fun getCurrentCoordinates(context: Context, locationClient: FusedLocationProviderClient, onSuccess: (Double, Double) -> Unit) {
-    if (ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED
-    ) {
-        // TODO: Consider calling
-        //    ActivityCompat#requestPermissions
-        // here to request the missing permissions, and then overriding
-        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-        //                                          int[] grantResults)
-        // to handle the case where the user grants the permission. See the documentation
-        // for ActivityCompat#requestPermissions for more details.
-        return
-    }
-    locationClient.lastLocation.addOnSuccessListener { location ->
-        if (location != null) {
-            onSuccess(location.latitude, location.longitude)
-        }
-    }
-
-}
-
 @Composable
 fun GeolocationAutomationForm(
-    getCurrentCoordinates: GetCurrentCoordinates
+    getCurrentCoordinates: GetCurrentCoordinates,
+    onCreate: (IAutomation) -> Unit
 ) {
-    var latitude by remember { mutableStateOf("") }
-    var longitude by remember { mutableStateOf("") }
+    var latitude by remember { mutableDoubleStateOf(0.0) }
+    var longitude by remember { mutableDoubleStateOf(0.0) }
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -67,8 +45,8 @@ fun GeolocationAutomationForm(
         Column(
         ) {
             OutlinedTextField(
-                value = latitude,
-                onValueChange = { latitude = it },
+                value = latitude.toString(),
+                onValueChange = { latitude = it.toDouble() },
                 label = { Text("Latitude") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
@@ -76,8 +54,8 @@ fun GeolocationAutomationForm(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = longitude,
-                onValueChange = { longitude = it },
+                value = longitude.toString(),
+                onValueChange = { longitude = it.toDouble() },
                 label = { Text("Longitude") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
@@ -87,8 +65,8 @@ fun GeolocationAutomationForm(
             Button(
                 onClick = {
                     getCurrentCoordinates { lat, long ->
-                        latitude = lat.toString()
-                        longitude = long.toString()
+                        latitude = lat
+                        longitude = long
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -100,7 +78,16 @@ fun GeolocationAutomationForm(
         Column(
         ) {
             Button(
-                onClick = { /* Save logic */ },
+                onClick = {
+                    val automation: GeolocationAutomation = GeolocationAutomation(
+                        automationId = null,
+                        latitude = latitude,
+                        longitude = longitude,
+                        name = "${latitude}, ${longitude}"
+                    )
+
+                    onCreate(automation as IAutomation)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Save")

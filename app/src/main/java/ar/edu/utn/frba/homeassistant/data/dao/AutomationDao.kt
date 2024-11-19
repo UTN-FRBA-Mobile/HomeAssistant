@@ -8,6 +8,8 @@ import androidx.room.Transaction
 import ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 
@@ -18,7 +20,12 @@ interface AutomationDao {
 
     @Transaction
     @Query("SELECT * FROM clockautomation")
-    fun getAllWithScenes(): LiveData<List<ClockAutomationWithScenes>>
+    fun getAllClockWithScenes(): LiveData<List<ClockAutomationWithScenes>>
+
+    @Transaction
+    @Query("SELECT * FROM geolocationautomation")
+    fun getAllGeolocationWithScenes(): LiveData<List<GeolocationAutomationWithScenes>>
+
 
 
 //
@@ -28,6 +35,9 @@ interface AutomationDao {
 //
     @Insert
     suspend fun insert(automation: ClockAutomation): Long
+
+    @Insert
+    suspend fun insert(automation: GeolocationAutomation): Long
 
     @Insert
     suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: AutomationSceneCrossRef)

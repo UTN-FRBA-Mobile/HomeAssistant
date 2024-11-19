@@ -6,6 +6,9 @@ import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Device
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
 import javax.inject.Inject
@@ -56,12 +59,11 @@ class AppRepository @Inject constructor(
         }
     }
 
-    fun getAutomations(): LiveData<List<ClockAutomationWithScenes>> = automationDao.getAllWithScenes()
+    fun getClockAutomationsWithScenes() = automationDao.getAllClockWithScenes()
+    fun getGeolocationAutomationsWithScenes() = automationDao.getAllGeolocationWithScenes()
 
-    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
-        println(clockAutomationWithScenes)
-        val id = automationDao.insert(clockAutomationWithScenes.automation)
-        clockAutomationWithScenes.scenes.forEach {
+    private suspend fun insertAutomationScenesCrossRef(id: Long, automationWithScenes: IAutomationWithScenes) {
+        automationWithScenes.scenes.forEach {
             println(it)
             automationDao.insertAutomationSceneCrossRef(
                 ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef(
@@ -70,5 +72,17 @@ class AppRepository @Inject constructor(
                 )
             )
         }
+    }
+
+    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes) {
+        println(clockAutomationWithScenes)
+        val id = automationDao.insert(clockAutomationWithScenes.automation)
+        insertAutomationScenesCrossRef(id, clockAutomationWithScenes)
+    }
+
+    suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes) {
+        println(geolocationAutomationWithScenes)
+        val id = automationDao.insert(geolocationAutomationWithScenes.automation)
+        insertAutomationScenesCrossRef(id, geolocationAutomationWithScenes)
     }
 }

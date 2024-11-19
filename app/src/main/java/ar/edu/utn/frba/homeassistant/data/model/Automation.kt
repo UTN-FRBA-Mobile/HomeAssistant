@@ -89,6 +89,29 @@ data class AutomationSceneCrossRef(
     val sceneId: Long
 )
 
+@Entity
+data class GeolocationAutomation (
+    @PrimaryKey(autoGenerate = true)
+    override val automationId: Long?,
+    val latitude: Double,
+    val longitude: Double,
+    override val isOn: Boolean = false,
+    override val name: String,
+    override val enabled: Boolean = true,
+    //override val scenes: List<Scene>,
+    override val type: String = "GEOLOCATION"
+): IAutomation
+
+data class GeolocationAutomationWithScenes(
+    @Relation(
+        parentColumn = "automationId",
+        entityColumn = "sceneId",
+        associateBy = Junction(AutomationSceneCrossRef::class)
+    )
+    override val scenes: List<Scene>,
+    @Embedded override val automation: GeolocationAutomation
+): IAutomationWithScenes
+
 //@Entity
 //data class GeolocationAutomation (
 //    @PrimaryKey(autoGenerate = true)
