@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
@@ -55,6 +56,15 @@ interface AutomationDao {
 
     @Insert
     suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: GeolocationAutomationSceneCrossRef)
+
+    @Update
+    suspend fun update(automation: ClockAutomation)
+
+    @Update
+    suspend fun update(automation: GeolocationAutomation)
+
+    @Update
+    suspend fun update(automation: ShakeAutomation)
 //
 //    @Update
 //    suspend fun update(scene: Scene)

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Device
@@ -13,6 +14,7 @@ import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import javax.inject.Inject
@@ -111,5 +113,17 @@ class AppRepository @Inject constructor(
             )
         }
         return id
+    }
+
+    suspend fun updateAutomation(automation: ClockAutomation){
+        automationDao.update(automation)
+    }
+
+    suspend fun updateAutomation(automation: GeolocationAutomation){
+        automationDao.update(automation)
+    }
+
+    suspend fun updateAutomation(automation: ShakeAutomation){
+        automationDao.update(automation)
     }
 }

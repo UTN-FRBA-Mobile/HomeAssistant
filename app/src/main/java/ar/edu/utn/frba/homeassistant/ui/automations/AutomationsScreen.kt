@@ -121,7 +121,7 @@ fun AutomationRow(
         }
 
         Switch(
-            checked = automation.automation.isOn,
+            checked = automation.automation.enabled,
             onCheckedChange = {
                 onToggle(it)
             }
