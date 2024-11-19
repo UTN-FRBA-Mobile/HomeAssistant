@@ -43,6 +43,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
+import ar.edu.utn.frba.homeassistant.ui.automations.AutomationsTabContent
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
 import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
@@ -53,8 +54,9 @@ import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 
-//@AndroidEntryPoint
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var geofencingClient: GeofencingClient
@@ -176,11 +178,7 @@ fun HomeAssistantMainScaffold() {
                 ScenesTabContent()
             }
             composable("automations") {
-                Text(
-                    text = "Automations",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                AutomationsTabContent()
             }
         }
 

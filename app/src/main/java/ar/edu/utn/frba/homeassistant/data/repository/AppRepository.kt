@@ -1,7 +1,10 @@
 package ar.edu.utn.frba.homeassistant.data.repository
 
+import androidx.lifecycle.LiveData
+import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
+import ar.edu.utn.frba.homeassistant.data.model.Automation
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
@@ -9,7 +12,8 @@ import javax.inject.Inject
 
 class AppRepository @Inject constructor(
     private val deviceDao: DeviceDao,
-    private val sceneDao: SceneDao
+    private val sceneDao: SceneDao,
+    private val automationDao: AutomationDao
 ) {
     fun getDevices() = deviceDao.getAll()
 
@@ -23,6 +27,8 @@ class AppRepository @Inject constructor(
     suspend fun deleteDevice(device: Device) = deviceDao.delete(device)
 
     fun getScenesWithDevices() = sceneDao.getAllWithDevices()
+
+    fun getScenes() = sceneDao.getAll();
 
     suspend fun addScene(name: String, devices: List<Device>) {
         val sceneId = sceneDao.insert(Scene(name = name))
@@ -49,4 +55,6 @@ class AppRepository @Inject constructor(
             )
         }
     }
+
+    fun getAutomations() = automationDao.getAll()
 }
