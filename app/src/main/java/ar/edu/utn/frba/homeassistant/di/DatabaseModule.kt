@@ -22,7 +22,9 @@ class DatabaseModule {
         app,
         AppDatabase::class.java,
         "home-assistant"
-    ).build()
+    )
+        .fallbackToDestructiveMigration() // Warning! This may cause data loss
+        .build()
 
     @Singleton
     @Provides
@@ -31,4 +33,8 @@ class DatabaseModule {
     @Singleton
     @Provides
     fun provideSceneDao(db: AppDatabase) = db.sceneDao()
+
+    @Singleton
+    @Provides
+    fun provideAutomationDao(db: AppDatabase) = db.automationDao()
 }

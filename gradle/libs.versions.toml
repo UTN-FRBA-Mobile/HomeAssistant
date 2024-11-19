@@ -12,6 +12,7 @@ playServicesCodeScanner = "16.1.0"
 uiTextGoogleFonts = "1.7.2"
 navigationRuntimeKtx = "2.8.1"
 navigationCompose = "2.8.1"
+playServicesLocation = "21.3.0"
 room = "2.6.1"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
@@ -43,6 +44,7 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
