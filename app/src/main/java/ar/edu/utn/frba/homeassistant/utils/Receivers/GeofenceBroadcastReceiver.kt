@@ -12,6 +12,7 @@ import com.google.android.gms.location.GeofencingEvent.fromIntent
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val geofencingEvent = fromIntent(intent)
+        val id = intent.getLongExtra("automationId", -1)
         if (geofencingEvent != null) {
             if (geofencingEvent.hasError()) {
                 val errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.errorCode)
@@ -19,6 +20,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 return
             }
         }
+
+        println("GEOFENCES - Automation with id: $id")
 
         // Manejar las transiciones de entrada o salida
         val geofenceTransition = geofencingEvent?.geofenceTransition

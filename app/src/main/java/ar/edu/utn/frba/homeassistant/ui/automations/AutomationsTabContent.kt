@@ -3,13 +3,11 @@ package ar.edu.utn.frba.homeassistant.ui.automations
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
-import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
 fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), getCurrentCoordinates: GetCurrentCoordinates) {

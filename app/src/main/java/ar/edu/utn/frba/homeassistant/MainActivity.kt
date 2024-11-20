@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.os.Build
@@ -53,7 +54,6 @@ import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
 import ar.edu.utn.frba.homeassistant.utils.Receivers.GeofenceBroadcastReceiver
 import ar.edu.utn.frba.homeassistant.utils.buildGeofence
 import ar.edu.utn.frba.homeassistant.utils.buildGeofenceRequest
-import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.GeofencingClient
@@ -74,6 +74,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val alarmManager = this.getSystemService(AlarmManager::class.java)
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             when {
                 // If permission is granted, proceed with scheduling exact alarms.
@@ -124,49 +126,63 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // SHAKING
-        // This code is temporal for testing purposes
-        val sensorManager: SensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        registerShakeSensor(sensorManager) {
-            Toast.makeText(this, "Shake Detected", Toast.LENGTH_SHORT).show()
-        }
-
         // LOCATION
         requestLocationPermissions(this)
 
         // GEOFENCING
-        // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
-        geofencingClient = LocationServices.getGeofencingClient(this)
-        val latitude = -34.598467238301744
-        val longitude = -58.42012906027254
-        val radius = 100f
-        val geofence = buildGeofence("TEST", latitude, longitude, radius)
-        val geofenceRequest = buildGeofenceRequest(geofence)
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            Intent(this, GeofenceBroadcastReceiver::class.java),
-            PendingIntent.FLAG_MUTABLE
-        )
-
-        // It must be there or linter will fail.
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            geofencingClient.addGeofences(geofenceRequest, pendingIntent).run {
-                addOnSuccessListener {
-                    Log.d("Geofence", "Geofence added")
-                }
-                addOnFailureListener { exception ->
-                    Log.d("Geofence", "Geofence not added: ${exception}")
-                }
-            }
-        } else {
-            // TODO: What should we do if we don't have permissions?
-        }
+//        // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
+//        geofencingClient = LocationServices.getGeofencingClient(this)
+//        val latitude = -34.598467238301744
+//        val longitude = -58.42012906027254
+//        val radius = 100f
+//        val geofence = buildGeofence("TEST", latitude, longitude, radius)
+//        val geofenceRequest = buildGeofenceRequest(geofence)
+//        val pendingIntent = PendingIntent.getBroadcast(
+//            this,
+//            0,
+//            Intent(this, GeofenceBroadcastReceiver::class.java),
+//            PendingIntent.FLAG_MUTABLE
+//        )
+//
+//        // It must be there or linter will fail.
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                ACCESS_FINE_LOCATION
+//            ) == PackageManager.PERMISSION_GRANTED
+//        ) {
+//            geofencingClient.addGeofences(geofenceRequest, pendingIntent).run {
+//                addOnSuccessListener {
+//                    Log.d("Geofence", "Geofence added")
+//                }
+//                addOnFailureListener { exception ->
+//                    Log.d("Geofence", "Geofence not added: ${exception}")
+//                }
+//            }
+//        } else {
+//            // TODO: What should we do if we don't have permissions?
+//        }
     }
+
+//    override fun onResume() {
+//        super.onResume()
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                println("Registering shake receiver - TIRAMISU")
+//                registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"), RECEIVER_NOT_EXPORTED)
+//            } else {
+//                println("Registering shake receiver - Oreo")
+//                registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"))
+//            }
+//        } else {
+//            println("Registering shake receiver - Pre-Oreo")
+//            registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"))
+//        }
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        unregisterReceiver(ShakeReceiver())
+//    }
 }
 
 @Preview

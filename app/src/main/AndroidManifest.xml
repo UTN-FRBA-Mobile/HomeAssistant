@@ -31,6 +31,8 @@
         <receiver android:name=".utils.Receivers.AlarmReceiver"
             android:enabled="true"
             android:exported="true" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
