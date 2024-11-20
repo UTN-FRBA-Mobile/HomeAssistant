@@ -11,5 +11,6 @@ data class SceneWithDevices(
         entityColumn = "deviceId",
         associateBy = Junction(SceneDeviceCrossRef::class)
     )
-    val devices: List<Device>
+    val devices: List<Device>,
+    var isOn: Boolean = false
 )

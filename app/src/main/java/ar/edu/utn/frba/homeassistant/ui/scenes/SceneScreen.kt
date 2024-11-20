@@ -18,7 +18,13 @@ import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, onDelete: (Scene) -> Unit) {
+fun ScenesScreen(
+    navController: NavController,
+    scenes: List<SceneWithDevices>,
+    onDelete: (Scene) -> Unit,
+    onToggle: (Device, Boolean) -> Unit,
+    onToggleScene: (SceneWithDevices, Boolean) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,7 +49,9 @@ fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, o
                 val scene = scenes[index]
                 SceneItem(scene, navController, onDelete = {
                     onDelete(scene.scene)
-                })
+                }, onToggle = { device, isOn ->
+                    onToggle(device, isOn)
+                }, onToggleScene = { onToggleScene(scene, it)  })
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
             }
@@ -51,12 +59,15 @@ fun ScenesScreen(navController: NavController, scenes: List<SceneWithDevices>, o
     }
 }
 
+
 @Composable
-fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, onDelete: () -> Unit) {
+fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, onDelete: () -> Unit, onToggle: (Device, Boolean) -> Unit, onToggleScene: (Boolean) -> Unit) {
+    var isOn by remember { mutableStateOf(sceneWithDevices.isOn) }
     var expanded by remember { mutableStateOf(false) }
     val scene = sceneWithDevices.scene
     val sceneDevices = sceneWithDevices.devices
     var showDialog by remember { mutableStateOf(false) }
+
 
     if (showDialog) {
         AlertDialog(
@@ -96,6 +107,14 @@ fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, 
             ) {
                 Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
             }
+            Switch(
+                checked = isOn,
+                onCheckedChange = {
+                    isOn = it
+                    onToggleScene(it)
+                }
+            )
+
             IconButton(onClick = {
                 showDialog = true  // Show confirmation dialog
             }) {
@@ -104,14 +123,14 @@ fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, 
         }
         if (expanded) {
             sceneDevices.forEach { device ->
-                DeviceControl(device)
+                DeviceControl(device, onToggle = { onToggle(device, it)  })
             }
         }
     }
 }
 
 @Composable
-fun DeviceControl(device: Device) {
+fun DeviceControl(device: Device, onToggle: (Boolean) -> Unit) {
     var isOn by remember { mutableStateOf(device.isOn) }
 
     Row(
@@ -128,9 +147,9 @@ fun DeviceControl(device: Device) {
 
         Switch(
             checked = isOn,
-            onCheckedChange = { isChecked ->
-                isOn = isChecked
-                device.isOn = isChecked  // Sauvegarde l'état du dispositif
+            onCheckedChange = {
+                isOn = it
+                onToggle(it)
             }
         )
     }

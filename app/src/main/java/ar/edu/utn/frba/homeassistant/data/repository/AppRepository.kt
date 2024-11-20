@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.homeassistant.data.repository
 
-import androidx.lifecycle.LiveData
 import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
@@ -11,9 +10,9 @@ import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
@@ -52,6 +51,8 @@ class AppRepository @Inject constructor(
     }
 
     suspend fun deleteScene(scene: Scene) = sceneDao.delete(scene)
+
+    suspend fun updateSceneState(scene: SceneWithDevices) = sceneDao.update(scene)
 
     suspend fun updateScene(sceneId: Long, devices: List<Device>) {
         sceneDao.deleteSceneDevices(sceneId)

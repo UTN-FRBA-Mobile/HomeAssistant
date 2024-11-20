@@ -17,7 +17,7 @@ fun ScenesTabContent(viewModel: ScenesViewModel = hiltViewModel()) {
 
     NavHost(navController, startDestination = "scenesList") {
         composable("scenesList") {
-            ScenesScreen(navController, scenes, viewModel::deleteScene)
+            ScenesScreen(navController, scenes, viewModel::deleteScene, viewModel::toggleDevice, viewModel::toggleScene)
         }
         composable("sceneDetail/{sceneId}") { backStackEntry ->
             val sceneId = backStackEntry.arguments?.getString("sceneId")?.toLong() ?: -1
