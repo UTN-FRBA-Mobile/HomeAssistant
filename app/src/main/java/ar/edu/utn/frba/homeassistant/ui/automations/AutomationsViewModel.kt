@@ -12,14 +12,11 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.network.UdpService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
@@ -79,13 +76,8 @@ class AutomationsViewModel @Inject constructor(
         return fun(automation: IAutomation) {
             when (automation) {
                 is ClockAutomation -> {
-                    val clockAutomationWithScenes =
-                        ClockAutomationWithScenes(
-                            scenes.toList(),
-                            automation
-                        )
                     viewModelScope.launch {
-                        val id = repository.addAutomation(clockAutomationWithScenes)
+                        val id = repository.addAutomation(automation, scenes.toList())
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }
@@ -98,13 +90,8 @@ class AutomationsViewModel @Inject constructor(
                 }
 
                 is GeolocationAutomation -> {
-                    val geolocationAutomationWithScenes =
-                        GeolocationAutomationWithScenes(
-                            scenes.toList(),
-                            automation
-                        )
                     viewModelScope.launch {
-                        val id = repository.addAutomation(geolocationAutomationWithScenes)
+                        val id = repository.addAutomation(automation, scenes.toList())
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }
@@ -152,13 +139,8 @@ class AutomationsViewModel @Inject constructor(
                 }
 
                 is ShakeAutomation -> {
-                    val shakeAutomationWithScenes =
-                        ShakeAutomationWithScenes(
-                            scenes.toList(),
-                            automation
-                        )
                     viewModelScope.launch {
-                        val id = repository.addAutomation(shakeAutomationWithScenes)
+                        val id = repository.addAutomation(automation, scenes.toList())
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }

@@ -13,8 +13,6 @@ import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
-import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
@@ -32,14 +30,10 @@ interface AutomationDao {
     @Query("SELECT * FROM geolocationautomation")
     fun getAllGeolocationWithScenes(): LiveData<List<GeolocationAutomationWithScenes>>
 
+    @Transaction
     @Query("SELECT * FROM shakeautomation")
     fun getAllShakeWithScenes(): LiveData<List<ShakeAutomationWithScenes>>
 
-//
-//    @Transaction
-//    @Query("SELECT * FROM scene")
-//    fun getAllWithDevices(): LiveData<List<SceneWithDevices>>
-//
     @Insert
     suspend fun insert(automation: ClockAutomation): Long
 

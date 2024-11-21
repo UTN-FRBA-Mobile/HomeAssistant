@@ -5,17 +5,14 @@ import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import javax.inject.Inject
 
 class AppRepository @Inject constructor(
@@ -68,42 +65,35 @@ class AppRepository @Inject constructor(
     fun getGeolocationAutomationsWithScenes() = automationDao.getAllGeolocationWithScenes()
     fun getShakeAutomationsWithScenes() = automationDao.getAllShakeWithScenes()
 
-
-    suspend fun addAutomation(clockAutomationWithScenes: ClockAutomationWithScenes): Long {
-        println(clockAutomationWithScenes)
-        val inserted = automationDao.insert(clockAutomationWithScenes.automation)
-        println(inserted)
-        clockAutomationWithScenes.scenes.forEach {
-            println(it)
+    suspend fun addAutomation(automation: ClockAutomation, scenes: List<Scene>): Long {
+        val id = automationDao.insert(automation)
+        scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
                 ClockAutomationSceneCrossRef(
                     it.sceneId,
-                    inserted //
-                )
-            )
-        }
-        return inserted
-    }
-
-    suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes): Long {
-        println(geolocationAutomationWithScenes)
-        val id = automationDao.insert(geolocationAutomationWithScenes.automation)
-        geolocationAutomationWithScenes.scenes.forEach {
-            println(it)
-            automationDao.insertAutomationSceneCrossRef(
-                GeolocationAutomationSceneCrossRef(
-                    it.sceneId, id
+                    id
                 )
             )
         }
         return id
     }
 
-    suspend fun addAutomation(shakeAutomationWithScenes: ShakeAutomationWithScenes): Long {
-        println(shakeAutomationWithScenes)
-        val id = automationDao.insert(shakeAutomationWithScenes.automation)
-        shakeAutomationWithScenes.scenes.forEach {
-            println(it)
+    suspend fun addAutomation(automation: GeolocationAutomation, scenes: List<Scene>): Long {
+        val id = automationDao.insert(automation)
+        scenes.forEach {
+            automationDao.insertAutomationSceneCrossRef(
+                GeolocationAutomationSceneCrossRef(
+                    it.sceneId,
+                    id
+                )
+            )
+        }
+        return id
+    }
+
+    suspend fun addAutomation(automation: ShakeAutomation, scenes: List<Scene>): Long {
+        val id = automationDao.insert(automation)
+        scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
                 ShakeAutomationSceneCrossRef(
                     it.sceneId,
@@ -114,7 +104,7 @@ class AppRepository @Inject constructor(
         return id
     }
 
-    suspend fun updateAutomation(automation: IAutomation){
+    suspend fun updateAutomation(automation: IAutomation) {
         when (automation) {
             is ClockAutomation -> automationDao.update(automation)
             is GeolocationAutomation -> automationDao.update(automation)
@@ -122,7 +112,7 @@ class AppRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteAutomation(automation: IAutomation){
+    suspend fun deleteAutomation(automation: IAutomation) {
         println(automation)
         when (automation) {
             is ClockAutomation -> automationDao.delete(automation)
