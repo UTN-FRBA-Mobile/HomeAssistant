@@ -18,13 +18,6 @@ fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), get
     val scenes by viewModel.scenes.observeAsState(emptyList())
 
     NavHost(navController, startDestination = "automationsList") {
-//        composable("devicesList") {
-//            DevicesScreen(navController, devices, viewModel::deleteDevice, viewModel::toggleDevice)
-//        }
-//        composable("deviceDetail/{deviceId}") { backStackEntry ->
-//            val deviceId = backStackEntry.arguments?.getString("deviceId")?.toLong() ?: -1
-//            DeviceDetailScreen(navController, devices, deviceId)
-//        }
         composable("addAutomation") {
             AddAutomationScreen(navController, viewModel::addAutomation, scenes = scenes, getCurrentCoordinates = getCurrentCoordinates)
         }
