@@ -37,6 +37,8 @@ class UdpService @Inject constructor(private val repository: AppRepository) {
     }
 
     private fun startListening() {
+        // To make this work with the emulator you have to open a terminal and configure the redirection to the emulator
+        // On mac -> nc localhost 5554 -> input credentials -> redir add udp:54321:54321
         CoroutineScope(Dispatchers.IO).launch {
             val socket = DatagramSocket(LISTEN_PORT)
             val buffer = ByteArray(1024)

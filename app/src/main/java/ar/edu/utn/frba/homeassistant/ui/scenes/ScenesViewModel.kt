@@ -13,7 +13,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ScenesViewModel @Inject constructor(private val repository: AppRepository, private val udpService: UdpService) : ViewModel() {
+class ScenesViewModel @Inject constructor(
+    private val repository: AppRepository,
+    private val udpService: UdpService
+) : ViewModel() {
 
     val scenes = repository.getScenesWithDevices()
     val devices = repository.getDevices()
@@ -48,12 +51,9 @@ class ScenesViewModel @Inject constructor(private val repository: AppRepository,
 
     fun toggleScene(scene: SceneWithDevices, isOn: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
-            udpService.sendUdpMessage(scene.scene.sceneId, if (isOn) "toggle:on" else "toggle:off")
-            repository.updateSceneState(scene.copy(isOn = isOn))
-            if (isOn) {
-                for (device in scene.devices) {
-                    toggleDevice(device, isOn)
-                }
+            scene.devices.forEach {
+                udpService.sendUdpMessage(it.deviceId, if (isOn) "toggle:on" else "toggle:off")
+                repository.updateDevice(it.copy(isOn = isOn))
             }
         }
     }

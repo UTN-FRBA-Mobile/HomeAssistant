@@ -12,7 +12,6 @@ import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossR
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
@@ -36,7 +35,7 @@ class AppRepository @Inject constructor(
 
     fun getScenesWithDevices() = sceneDao.getAllWithDevices()
 
-    fun getScenes() = sceneDao.getAll();
+    fun getScenes() = sceneDao.getAll()
 
     suspend fun addScene(name: String, devices: List<Device>) {
         val sceneId = sceneDao.insert(Scene(name = name))
@@ -51,8 +50,6 @@ class AppRepository @Inject constructor(
     }
 
     suspend fun deleteScene(scene: Scene) = sceneDao.delete(scene)
-
-    suspend fun updateSceneState(scene: SceneWithDevices) = sceneDao.update(scene)
 
     suspend fun updateScene(sceneId: Long, devices: List<Device>) {
         sceneDao.deleteSceneDevices(sceneId)
@@ -84,7 +81,7 @@ class AppRepository @Inject constructor(
                 )
             )
         }
-        return inserted;
+        return inserted
     }
 
     suspend fun addAutomation(geolocationAutomationWithScenes: GeolocationAutomationWithScenes): Long {
@@ -98,7 +95,7 @@ class AppRepository @Inject constructor(
                 )
             )
         }
-        return id;
+        return id
     }
 
     suspend fun addAutomation(shakeAutomationWithScenes: ShakeAutomationWithScenes): Long {
