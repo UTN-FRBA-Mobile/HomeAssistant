@@ -47,11 +47,11 @@ fun ScenesScreen(
         ) {
             items(scenes.size) { index ->
                 val scene = scenes[index]
-                SceneItem(scene, navController, onDelete = {
+                SceneItem(scene, onDelete = {
                     onDelete(scene.scene)
                 }, onToggle = { device, isOn ->
                     onToggle(device, isOn)
-                }, onToggleScene = { onToggleScene(scene, it)  })
+                }, onToggleScene = { onToggleScene(scene, it) })
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
             }
@@ -61,12 +61,18 @@ fun ScenesScreen(
 
 
 @Composable
-fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, onDelete: () -> Unit, onToggle: (Device, Boolean) -> Unit, onToggleScene: (Boolean) -> Unit) {
-    var isOn by remember { mutableStateOf(sceneWithDevices.isOn) }
+fun SceneItem(
+    sceneWithDevices: SceneWithDevices,
+    onDelete: () -> Unit,
+    onToggle: (Device, Boolean) -> Unit,
+    onToggleScene: (Boolean) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     val scene = sceneWithDevices.scene
     val sceneDevices = sceneWithDevices.devices
     var showDialog by remember { mutableStateOf(false) }
+
+    println(sceneWithDevices)
 
 
     if (showDialog) {
@@ -102,15 +108,15 @@ fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, 
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            Column(modifier = Modifier
-                .weight(1f)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
             ) {
                 Text(text = scene.name, style = MaterialTheme.typography.titleMedium)
             }
             Switch(
-                checked = isOn,
+                checked = sceneDevices.all { it.isOn },
                 onCheckedChange = {
-                    isOn = it
                     onToggleScene(it)
                 }
             )
@@ -123,7 +129,7 @@ fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, 
         }
         if (expanded) {
             sceneDevices.forEach { device ->
-                DeviceControl(device, onToggle = { onToggle(device, it)  })
+                DeviceControl(device, onToggle = { onToggle(device, it) })
             }
         }
     }
@@ -131,8 +137,6 @@ fun SceneItem(sceneWithDevices: SceneWithDevices, navController: NavController, 
 
 @Composable
 fun DeviceControl(device: Device, onToggle: (Boolean) -> Unit) {
-    var isOn by remember { mutableStateOf(device.isOn) }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -146,9 +150,8 @@ fun DeviceControl(device: Device, onToggle: (Boolean) -> Unit) {
         )
 
         Switch(
-            checked = isOn,
+            checked = device.isOn,
             onCheckedChange = {
-                isOn = it
                 onToggle(it)
             }
         )
