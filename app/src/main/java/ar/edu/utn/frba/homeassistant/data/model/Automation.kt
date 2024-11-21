@@ -11,7 +11,6 @@ interface IAutomation {
     val name: String
     val isOn: Boolean
     val enabled: Boolean
-    val type: String // It should not be needed, i should use polymorphism
 }
 
 @Entity
@@ -22,7 +21,6 @@ data class ClockAutomation (
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean,
-    override val type: String = "CLOCK",
     val shouldTurnOn: Boolean,
     val monday: Boolean,
     val tuesday: Boolean,
@@ -75,7 +73,6 @@ data class GeolocationAutomation (
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean = true,
-    override val type: String = "GEOLOCATION"
 ): IAutomation
 
 data class GeolocationAutomationWithScenes(
@@ -96,7 +93,6 @@ data class ShakeAutomation (
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean = true,
-    override val type: String = "SHAKE",
     val threshold: Int
 ): IAutomation
 

@@ -41,34 +41,10 @@ class AutomationsViewModel @Inject constructor(
     private val application: Application
 ) : ViewModel() {
 
-    val clockAutomations = repository.getClockAutomationsWithScenes();
-    val geolocationAutomations = repository.getGeolocationAutomationsWithScenes();
-    val shakeAutomations = repository.getShakeAutomationsWithScenes();
-    val scenes = repository.getScenes();
-//
-//    fun addDevice(id: Long, name: String, type: String) {
-//        viewModelScope.launch {
-//            val existingDevice = repository.getDeviceById(id)
-//            if (existingDevice != null) {
-//                SnackbarManager.showMessage("Device with ID $id already exists.")
-//            } else {
-//                repository.addDevice(id, name, type)
-//            }
-//        }
-//    }
-//
-//    fun deleteDevice(device: Device) {
-//        viewModelScope.launch {
-//            repository.deleteDevice(device)
-//        }
-//    }
-//
-//    fun toggleDevice(device: Device, isOn: Boolean) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            udpService.sendUdpMessage(device.deviceId, if (isOn) "toggle:on" else "toggle:off")
-//            repository.updateDevice(device.copy(isOn = isOn))
-//        }
-//    }
+    val clockAutomations = repository.getClockAutomationsWithScenes()
+    val geolocationAutomations = repository.getGeolocationAutomationsWithScenes()
+    val shakeAutomations = repository.getShakeAutomationsWithScenes()
+    val scenes = repository.getScenes()
 
     fun deleteAutomation(automation: IAutomation) {
         viewModelScope.launch {
@@ -101,14 +77,12 @@ class AutomationsViewModel @Inject constructor(
 
     fun addAutomation(scenes: Set<Scene>): (IAutomation) -> Unit {
         return fun(automation: IAutomation) {
-            when (automation.type) {
-                "CLOCK" -> {
-                    val clockAutomation =
-                        automation as ClockAutomation
+            when (automation) {
+                is ClockAutomation -> {
                     val clockAutomationWithScenes =
                         ClockAutomationWithScenes(
                             scenes.toList(),
-                            clockAutomation
+                            automation
                         )
                     viewModelScope.launch {
                         val id = repository.addAutomation(clockAutomationWithScenes)
@@ -119,17 +93,15 @@ class AutomationsViewModel @Inject constructor(
                         )
 
                         val context = application.applicationContext
-                        setAlarm(context, id, clockAutomation)
+                        setAlarm(context, id, automation)
                     }
                 }
 
-                "GEOLOCATION" -> {
-                    val geolocationAutomation =
-                        automation as GeolocationAutomation
+                is GeolocationAutomation -> {
                     val geolocationAutomationWithScenes =
                         GeolocationAutomationWithScenes(
                             scenes.toList(),
-                            geolocationAutomation
+                            automation
                         )
                     viewModelScope.launch {
                         val id = repository.addAutomation(geolocationAutomationWithScenes)
@@ -141,8 +113,8 @@ class AutomationsViewModel @Inject constructor(
                         // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
                         val geofencingClient =
                             LocationServices.getGeofencingClient(application.applicationContext)
-                        val latitude = geolocationAutomation.latitude
-                        val longitude = geolocationAutomation.longitude
+                        val latitude = automation.latitude
+                        val longitude = automation.longitude
                         val radius = 100f // TODO: Unhardcode
                         val geofence =
                             buildGeofence("$latitude,$longitude", latitude, longitude, radius)
@@ -179,13 +151,11 @@ class AutomationsViewModel @Inject constructor(
                     }
                 }
 
-                "SHAKE" -> {
-                    val shakeAutomation =
-                        automation as ShakeAutomation
+                is ShakeAutomation -> {
                     val shakeAutomationWithScenes =
                         ShakeAutomationWithScenes(
                             scenes.toList(),
-                            shakeAutomation
+                            automation
                         )
                     viewModelScope.launch {
                         val id = repository.addAutomation(shakeAutomationWithScenes)
