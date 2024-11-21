@@ -10,6 +10,7 @@ import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
@@ -113,15 +114,20 @@ class AppRepository @Inject constructor(
         return id
     }
 
-    suspend fun updateAutomation(automation: ClockAutomation){
-        automationDao.update(automation)
+    suspend fun updateAutomation(automation: IAutomation){
+        when (automation) {
+            is ClockAutomation -> automationDao.update(automation)
+            is GeolocationAutomation -> automationDao.update(automation)
+            is ShakeAutomation -> automationDao.update(automation)
+        }
     }
 
-    suspend fun updateAutomation(automation: GeolocationAutomation){
-        automationDao.update(automation)
-    }
-
-    suspend fun updateAutomation(automation: ShakeAutomation){
-        automationDao.update(automation)
+    suspend fun deleteAutomation(automation: IAutomation){
+        println(automation)
+        when (automation) {
+            is ClockAutomation -> automationDao.delete(automation)
+            is GeolocationAutomation -> automationDao.delete(automation)
+            is ShakeAutomation -> automationDao.delete(automation)
+        }
     }
 }

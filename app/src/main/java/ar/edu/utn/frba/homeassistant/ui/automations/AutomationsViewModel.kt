@@ -9,13 +9,17 @@ import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.network.UdpService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
@@ -29,7 +33,6 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.log
 
 @HiltViewModel
 class AutomationsViewModel @Inject constructor(
@@ -67,9 +70,9 @@ class AutomationsViewModel @Inject constructor(
 //        }
 //    }
 
-    fun deleteAutomation(automation: Any) {
+    fun deleteAutomation(automation: IAutomation) {
         viewModelScope.launch {
-            SnackbarManager.showMessage("Automation deleted.")
+            repository.deleteAutomation(automation)
         }
     }
 
@@ -77,9 +80,17 @@ class AutomationsViewModel @Inject constructor(
         viewModelScope.launch {
             automation.automation.automationId?.let {
                 if (enable) {
-                    setAlarm(application.applicationContext, it, automation.automation as ClockAutomation)
+                    setAlarm(
+                        application.applicationContext,
+                        it,
+                        automation.automation as ClockAutomation
+                    )
                 } else {
-                    cancelAlarm(application.applicationContext, it, automation.automation as ClockAutomation)
+                    cancelAlarm(
+                        application.applicationContext,
+                        it,
+                        automation.automation as ClockAutomation
+                    )
                 }
 
                 repository.updateAutomation((automation.automation as ClockAutomation).copy(enabled = enable))
@@ -93,9 +104,9 @@ class AutomationsViewModel @Inject constructor(
             when (automation.type) {
                 "CLOCK" -> {
                     val clockAutomation =
-                        automation as ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+                        automation as ClockAutomation
                     val clockAutomationWithScenes =
-                        ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes(
+                        ClockAutomationWithScenes(
                             scenes.toList(),
                             clockAutomation
                         )
@@ -114,9 +125,9 @@ class AutomationsViewModel @Inject constructor(
 
                 "GEOLOCATION" -> {
                     val geolocationAutomation =
-                        automation as ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+                        automation as GeolocationAutomation
                     val geolocationAutomationWithScenes =
-                        ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes(
+                        GeolocationAutomationWithScenes(
                             scenes.toList(),
                             geolocationAutomation
                         )
@@ -128,13 +139,18 @@ class AutomationsViewModel @Inject constructor(
                             }."
                         )
                         // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
-                        val geofencingClient = LocationServices.getGeofencingClient(application.applicationContext)
+                        val geofencingClient =
+                            LocationServices.getGeofencingClient(application.applicationContext)
                         val latitude = geolocationAutomation.latitude
                         val longitude = geolocationAutomation.longitude
                         val radius = 100f // TODO: Unhardcode
-                        val geofence = buildGeofence("$latitude,$longitude", latitude, longitude, radius)
+                        val geofence =
+                            buildGeofence("$latitude,$longitude", latitude, longitude, radius)
                         val geofenceRequest = buildGeofenceRequest(geofence)
-                        val intent = Intent(application.applicationContext, GeofenceBroadcastReceiver::class.java)
+                        val intent = Intent(
+                            application.applicationContext,
+                            GeofenceBroadcastReceiver::class.java
+                        )
                         intent.putExtra("automationId", id)
                         val pendingIntent = PendingIntent.getBroadcast(
                             application.applicationContext,
@@ -165,9 +181,9 @@ class AutomationsViewModel @Inject constructor(
 
                 "SHAKE" -> {
                     val shakeAutomation =
-                        automation as ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
+                        automation as ShakeAutomation
                     val shakeAutomationWithScenes =
-                        ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes(
+                        ShakeAutomationWithScenes(
                             scenes.toList(),
                             shakeAutomation
                         )
@@ -178,7 +194,8 @@ class AutomationsViewModel @Inject constructor(
                                 scenes.map { it.name }.joinToString { it }
                             }."
                         )
-                        val sensorManager: SensorManager = application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
+                        val sensorManager: SensorManager =
+                            application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
                         registerShakeSensor(sensorManager) {
                             println("Shake detected!! - Automation id: $id")
                             println("TODO: Trigger automation")

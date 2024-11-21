@@ -2,6 +2,7 @@ package ar.edu.utn.frba.homeassistant.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -65,6 +66,15 @@ interface AutomationDao {
 
     @Update
     suspend fun update(automation: ShakeAutomation)
+
+    @Delete
+    suspend fun delete(automation: ClockAutomation)
+
+    @Delete
+    suspend fun delete(automation: GeolocationAutomation)
+
+    @Delete
+    suspend fun delete(automation: ShakeAutomation)
 //
 //    @Update
 //    suspend fun update(scene: Scene)

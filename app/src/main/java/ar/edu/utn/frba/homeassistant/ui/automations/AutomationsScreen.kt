@@ -38,7 +38,7 @@ import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 fun AutomationsScreen(
     navController: NavController,
     automations: List<IAutomationWithScenes>,
-    onDelete: (IAutomationWithScenes) -> Unit,
+    onDelete: (IAutomation) -> Unit,
     onToggle: (IAutomationWithScenes, Boolean) -> Unit
 ) {
 
@@ -67,7 +67,7 @@ fun AutomationsScreen(
             items(automations.size) { index ->
                 val automation = automations[index]
                 AutomationRow(automation, navController, onDelete = {
-                    onDelete(automation)
+                    onDelete(automation.automation)
                 }, onToggle = { onToggle(automation, it)  })
                 HorizontalDivider()
             }
