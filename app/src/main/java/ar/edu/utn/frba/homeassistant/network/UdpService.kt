@@ -25,16 +25,22 @@ class UdpService @Inject constructor(private val repository: AppRepository) {
         }
     }
 
-    fun sendUdpMessage(deviceId: Long, message: String) {
-        val socket = DatagramSocket()
-        socket.use {
-            val broadcastIP =
-                InetAddress.getByName("10.0.2.2") // 10.0.2.2 is an alias to your host loopback interface https://developer.android.com/studio/run/emulator-networking#networkaddresses
-            val data = "$deviceId:$message".toByteArray()
-            val packet = DatagramPacket(data, data.size, broadcastIP, PORT)
-            socket.send(packet)
+    companion object {
+        fun sendUdpMessage(deviceId: Long, message: String) {
+            val socket = DatagramSocket()
+            socket.use {
+                val broadcastIP =
+                    InetAddress.getByName("10.0.2.2") // 10.0.2.2 is an alias to your host loopback interface https://developer.android.com/studio/run/emulator-networking#networkaddresses
+                val data = "$deviceId:$message".toByteArray()
+                val packet = DatagramPacket(data, data.size, broadcastIP, PORT)
+                socket.send(packet)
+            }
         }
     }
+
+    fun sendUdpMessage(deviceId: Long, message: String) =
+        UdpService.sendUdpMessage(deviceId, message)
+
 
     private fun startListening() {
         // To make this work with the emulator you have to open a terminal and configure the redirection to the emulator

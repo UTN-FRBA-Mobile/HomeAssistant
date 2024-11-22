@@ -1,12 +1,10 @@
 package ar.edu.utn.frba.homeassistant.ui.automations
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.app.Activity.SENSOR_SERVICE
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.SensorManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
@@ -18,13 +16,13 @@ import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
-import ar.edu.utn.frba.homeassistant.network.UdpService
+import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
+import ar.edu.utn.frba.homeassistant.network.SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.utils.Receivers.GeofenceBroadcastReceiver
 import ar.edu.utn.frba.homeassistant.utils.buildGeofence
 import ar.edu.utn.frba.homeassistant.utils.buildGeofenceRequest
 import ar.edu.utn.frba.homeassistant.utils.cancelAlarm
-import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
 import ar.edu.utn.frba.homeassistant.utils.setAlarm
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +32,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AutomationsViewModel @Inject constructor(
     private val repository: AppRepository,
-    private val udpService: UdpService,
     private val application: Application
 ) : ViewModel() {
 
@@ -146,12 +143,32 @@ class AutomationsViewModel @Inject constructor(
                                 scenes.map { it.name }.joinToString { it }
                             }."
                         )
-                        val sensorManager: SensorManager =
-                            application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
-                        registerShakeSensor(sensorManager) {
-                            println("Shake detected!! - Automation id: $id")
-                            println("TODO: Trigger automation")
-                        }
+                        val scenesWithDevices =
+                            repository.getSceneByIdWithDevices(scenes.toList().map { it.sceneId })
+//                        val sensorManager: SensorManager =
+//                            application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
+                        val devicesIds =
+                            scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
+                        println("Sending broadcast")
+                        val intent = Intent(SHAKE_AUTOMATION)
+                        intent.putExtra(DEVICE_IDS, devicesIds.toLongArray())
+                        application.applicationContext.sendBroadcast(intent)
+                        println("Broadcast sent")
+//                        registerShakeSensor(sensorManager) {
+//                            println("Shake detected!! - Automation id: $id")
+//                            val intent = Intent(
+//                                application.applicationContext,
+//                                UdpForegroundService::class.java
+//                            )
+//                            intent.putExtra("deviceId", devicesIds.toLongArray())
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                application.applicationContext.startForegroundService(
+//                                    intent
+//                                )
+//                            } else {
+//                                application.applicationContext.startService(intent)
+//                            }
+//                        }
                     }
                 }
 

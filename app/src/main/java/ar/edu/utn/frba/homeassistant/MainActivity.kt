@@ -4,16 +4,12 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,14 +42,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ar.edu.utn.frba.homeassistant.network.UdpForegroundService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.ui.automations.AutomationsTabContent
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
 import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
-import ar.edu.utn.frba.homeassistant.utils.Receivers.GeofenceBroadcastReceiver
-import ar.edu.utn.frba.homeassistant.utils.buildGeofence
-import ar.edu.utn.frba.homeassistant.utils.buildGeofenceRequest
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.GeofencingClient
@@ -82,6 +76,7 @@ class MainActivity : ComponentActivity() {
                 alarmManager.canScheduleExactAlarms() -> {
                     println("Can schedule exact alarms")
                 }
+
                 else -> {
                     // Ask users to go to exact alarm page in system settings.
                     this.startActivity(Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
@@ -94,14 +89,32 @@ class MainActivity : ComponentActivity() {
             // TODO: ATM you will need to activate notifications manually. We should add an alert.
             val channelId = "ALARM_AUTOMATIONS"
             val channelName = "Automations Notifications"
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
+            val udpChannel = NotificationChannel(
+                "UDP_CHANNEL",
+                "Shake Automation",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            notificationManager.createNotificationChannel(udpChannel)
         } else {
 
         }
 
+        val intent = Intent(
+            this,
+            UdpForegroundService::class.java
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.startForegroundService(
+                intent
+            )
+        } else {
+            this.startService(intent)
+        }
 
-        fun getCurrentCoordinates(onSuccess: (Double, Double) -> Unit){
+        fun getCurrentCoordinates(onSuccess: (Double, Double) -> Unit) {
             if (ActivityCompat.checkSelfPermission(
                     this,
                     ACCESS_FINE_LOCATION

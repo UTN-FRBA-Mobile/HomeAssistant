@@ -20,6 +20,10 @@ interface SceneDao {
     @Query("SELECT * FROM scene")
     fun getAllWithDevices(): LiveData<List<SceneWithDevices>>
 
+    @Transaction
+    @Query("SELECT * FROM scene WHERE sceneId IN(:sceneIds)")
+    suspend fun getSceneByIdWithDevices(sceneIds: List<Long>): List<SceneWithDevices>
+
     @Insert
     suspend fun insert(scene: Scene): Long
 
