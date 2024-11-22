@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.homeassistant.ui.automations.forms
 
 import android.app.TimePickerDialog
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import ar.edu.utn.frba.homeassistant.TAG
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import java.util.Calendar
@@ -39,6 +42,8 @@ fun ClockAutomationForm(
 ) {
     var time by remember { mutableStateOf("") }
     var shouldTurnOn by remember { mutableStateOf(true) }
+
+    val selectedScenes = remember { mutableStateOf(listOf<IAutomation>()) }
 
     val selectedDays = remember {
         mutableStateMapOf( // Estado para días seleccionados
@@ -52,6 +57,28 @@ fun ClockAutomationForm(
         )
     }
 
+    var showAlert by remember { mutableStateOf(false) }
+    if (showAlert) {
+        AlertDialog(
+            onDismissRequest = { showAlert = false },
+            confirmButton = {
+                if(false) {
+                    Button(onClick = {
+                        showAlert = false
+                    }) {
+                        Text("do anyway")
+                    }
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showAlert = false }) {
+                    Text("Ok")
+                }
+            },
+            title = { Text("Action impossible") },
+            text = { Text("You didn't select any scene. You have to select al menos una.") }
+        )
+    }
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -140,27 +167,31 @@ fun ClockAutomationForm(
         ) {
             Button(
                 onClick = {
+                    if (selectedScenes.value.isEmpty()) {
+                        showAlert = true
+                    }else{
 
-                    val name = selectedDays.entries.filter { it.value }
-                        .map { it.key.slice(IntRange(0, 1)) }.joinToString(
-                        ", "
-                    )
-                    val automation = ClockAutomation(
-                        automationId = null,
-                        time = time,
-                        isOn = false,
-                        name = "[${name}] - ${time}",
-                        enabled = true,
-                        shouldTurnOn = shouldTurnOn,
-                        monday = selectedDays["Monday"] ?: false,
-                        tuesday = selectedDays["Tuesday"] ?: false,
-                        wednesday = selectedDays["Wednesday"] ?: false,
-                        thursday = selectedDays["Thursday"] ?: false,
-                        friday = selectedDays["Friday"] ?: false,
-                        saturday = selectedDays["Saturday"] ?: false,
-                        sunday = selectedDays["Sunday"] ?: false
-                    )
-                    onCreate(automation as IAutomation)
+                        val name = selectedDays.entries.filter { it.value }
+                            .map { it.key.slice(IntRange(0, 1)) }.joinToString(
+                            ", "
+                            )
+                        val automation = ClockAutomation(
+                            automationId = null,
+                            time = time,
+                            isOn = false,
+                            name = "[${name}] - ${time}",
+                            enabled = true,
+                            shouldTurnOn = shouldTurnOn,
+                            monday = selectedDays["Monday"] ?: false,
+                            tuesday = selectedDays["Tuesday"] ?: false,
+                            wednesday = selectedDays["Wednesday"] ?: false,
+                            thursday = selectedDays["Thursday"] ?: false,
+                            friday = selectedDays["Friday"] ?: false,
+                            saturday = selectedDays["Saturday"] ?: false,
+                            sunday = selectedDays["Sunday"] ?: false
+                        )
+                        onCreate(automation as IAutomation)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
