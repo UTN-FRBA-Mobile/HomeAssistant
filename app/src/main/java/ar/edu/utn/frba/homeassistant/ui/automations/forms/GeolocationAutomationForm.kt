@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,16 +28,42 @@ import androidx.core.app.ActivityCompat
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
 fun GeolocationAutomationForm(
     getCurrentCoordinates: GetCurrentCoordinates,
+    selectedScenes : Set<Scene>,
     onCreate: (IAutomation) -> Unit
 ) {
     var latitude by remember { mutableDoubleStateOf(0.0) }
     var longitude by remember { mutableDoubleStateOf(0.0) }
+
+    var showAlert by remember { mutableStateOf(false) }
+    if (showAlert) {
+        AlertDialog(
+            onDismissRequest = { showAlert = false },
+            confirmButton = {
+                if(false) {
+                    Button(onClick = {
+                        showAlert = false
+                    }) {
+                        Text("do anyway")
+                    }
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showAlert = false }) {
+                    Text("Ok")
+                }
+            },
+            title = { Text("Action impossible") },
+            text = { Text("You didn't select any scene. You have to select al menos una.") }
+        )
+    }
+
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -79,14 +106,18 @@ fun GeolocationAutomationForm(
         ) {
             Button(
                 onClick = {
-                    val automation: GeolocationAutomation = GeolocationAutomation(
-                        automationId = null,
-                        latitude = latitude,
-                        longitude = longitude,
-                        name = "${latitude}, ${longitude}"
-                    )
+                    if (selectedScenes.isEmpty()) {
+                        showAlert = true
+                    }else {
+                        val automation: GeolocationAutomation = GeolocationAutomation(
+                            automationId = null,
+                            latitude = latitude,
+                            longitude = longitude,
+                            name = "${latitude}, ${longitude}"
+                        )
 
-                    onCreate(automation as IAutomation)
+                        onCreate(automation as IAutomation)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

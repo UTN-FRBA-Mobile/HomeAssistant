@@ -111,9 +111,9 @@ fun AutomationForm(
 
                 // Display fields based on selected automation
                 when (selectedAutomation) {
-                    "Clock Automation" -> ClockAutomationForm(onCreate(selectedScenes))
-                    "Geolocation Automation" -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates, onCreate = onCreate(selectedScenes))
-                    "Shake Automation" -> ShakeAutomationForm(onCreate = onCreate(selectedScenes))
+                    "Clock Automation" -> ClockAutomationForm(selectedScenes, onCreate(selectedScenes))
+                    "Geolocation Automation" -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates, selectedScenes, onCreate = onCreate(selectedScenes))
+                    "Shake Automation" -> ShakeAutomationForm(selectedScenes, onCreate = onCreate(selectedScenes))
                 }
             }
 //            Column(

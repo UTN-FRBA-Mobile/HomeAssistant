@@ -34,16 +34,16 @@ import androidx.compose.ui.unit.dp
 import ar.edu.utn.frba.homeassistant.TAG
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.Scene
 import java.util.Calendar
 
 @Composable
 fun ClockAutomationForm(
+    selectedScenes : Set<Scene>,
     onCreate: (IAutomation) -> Unit
 ) {
     var time by remember { mutableStateOf("") }
     var shouldTurnOn by remember { mutableStateOf(true) }
-
-    val selectedScenes = remember { mutableStateOf(listOf<IAutomation>()) }
 
     val selectedDays = remember {
         mutableStateMapOf( // Estado para días seleccionados
@@ -167,7 +167,7 @@ fun ClockAutomationForm(
         ) {
             Button(
                 onClick = {
-                    if (selectedScenes.value.isEmpty()) {
+                    if (selectedScenes.isEmpty()) {
                         showAlert = true
                     }else{
 
