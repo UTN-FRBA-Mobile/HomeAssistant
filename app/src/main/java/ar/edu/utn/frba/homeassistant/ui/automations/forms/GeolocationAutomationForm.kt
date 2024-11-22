@@ -60,7 +60,7 @@ fun GeolocationAutomationForm(
                 }
             },
             title = { Text("Action impossible") },
-            text = { Text("You didn't select any scene. You have to select al menos una.") }
+            text = { Text("You didn't select any scene. You have to select at least one.") }
         )
     }
 
