@@ -1,14 +1,11 @@
 package ar.edu.utn.frba.homeassistant.ui.automations
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Application
-import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
@@ -17,24 +14,22 @@ import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
+import ar.edu.utn.frba.homeassistant.network.GEO_AUTOMATION
 import ar.edu.utn.frba.homeassistant.network.SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
-import ar.edu.utn.frba.homeassistant.utils.Receivers.GeofenceBroadcastReceiver
-import ar.edu.utn.frba.homeassistant.utils.buildGeofence
-import ar.edu.utn.frba.homeassistant.utils.buildGeofenceRequest
 import ar.edu.utn.frba.homeassistant.utils.cancelAlarm
 import ar.edu.utn.frba.homeassistant.utils.setAlarm
-import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+const val TAG = "$GLOBAL_TAG#AUTOMATIONS_VIEW_MODEL"
 
 @HiltViewModel
 class AutomationsViewModel @Inject constructor(
     private val repository: AppRepository,
     private val application: Application
 ) : ViewModel() {
-
     val clockAutomations = repository.getClockAutomationsWithScenes()
     val geolocationAutomations = repository.getGeolocationAutomationsWithScenes()
     val shakeAutomations = repository.getShakeAutomationsWithScenes()
@@ -71,73 +66,35 @@ class AutomationsViewModel @Inject constructor(
 
     fun addAutomation(scenes: Set<Scene>): (IAutomation) -> Unit {
         return fun(automation: IAutomation) {
+            Log.d(TAG, "[addAutomation]: Request to add automations for scenes:  ${scenes.map { it.name }.joinToString(",") { it }}")
             when (automation) {
                 is ClockAutomation -> {
+                    Log.d(TAG, "[addAutomation#clockAutomation]: Request to add clock automation")
                     viewModelScope.launch {
+                        Log.d(TAG, "[addAutomation#clockAutomation#viewModelScope]: Request to save automation in database")
                         val id = repository.addAutomation(automation, scenes.toList())
+                        Log.d(TAG, "[addAutomation#clockAutomation]: Automation successfully saved with id $id")
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }
                             }."
                         )
-
-                        val context = application.applicationContext
-                        setAlarm(context, id, automation)
+                        Log.d(TAG, "[addAutomation#clockAutomation]: Setting alarm for automation")
+                        setAlarm(application.applicationContext, id, automation)
                     }
                 }
 
                 is GeolocationAutomation -> {
+                    Log.d(TAG, "[addAutomation#geolocationAutomation]: Request to add geolocation automation")
                     viewModelScope.launch {
+                        Log.d(TAG, "[addAutomation#geolocationAutomation#viewModelScope]: Request to save automation in database")
                         val id = repository.addAutomation(automation, scenes.toList())
+                        Log.d(TAG, "[addAutomation#geolocationAutomation]: Automation successfully saved with id $id")
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }
                             }."
                         )
-                        // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
-                        val geofencingClient =
-                            LocationServices.getGeofencingClient(application.applicationContext)
-                        val latitude = automation.latitude
-                        val longitude = automation.longitude
-                        val radius = 100f // TODO: Unhardcode
-                        val geofence =
-                            buildGeofence("$latitude,$longitude", latitude, longitude, radius)
-                        val geofenceRequest = buildGeofenceRequest(geofence)
-                        val intent = Intent(
-                            application.applicationContext,
-                            GeofenceBroadcastReceiver::class.java
-                        )
-                        intent.putExtra("automationId", id)
-                        val pendingIntent = PendingIntent.getBroadcast(
-                            application.applicationContext,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_MUTABLE
-                        )
-
-                        // It must be there or linter will fail.
-                        if (ActivityCompat.checkSelfPermission(
-                                application.applicationContext,
-                                ACCESS_FINE_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            geofencingClient.addGeofences(geofenceRequest, pendingIntent).run {
-                                addOnSuccessListener {
-                                    Log.d("Geofence", "Geofence added")
-                                }
-                                addOnFailureListener { exception ->
-                                    Log.d("Geofence", "Geofence not added: ${exception}")
-                                }
-                            }
-                        } else {
-                            // TODO: What should we do if we don't have permissions?
-                        }
-                    }
-                }
-
-                is ShakeAutomation -> {
-                    viewModelScope.launch {
-                        val id = repository.addAutomation(automation, scenes.toList())
                         SnackbarManager.showMessage(
                             "${automation.name} added for scenes ${
                                 scenes.map { it.name }.joinToString { it }
@@ -145,36 +102,47 @@ class AutomationsViewModel @Inject constructor(
                         )
                         val scenesWithDevices =
                             repository.getSceneByIdWithDevices(scenes.toList().map { it.sceneId })
-//                        val sensorManager: SensorManager =
-//                            application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
                         val devicesIds =
                             scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
-                        println("Sending broadcast")
+                        Log.d(TAG, "[addAutomation#geolocationAutomation]: Sending broadcast")
+                        val intent = Intent(GEO_AUTOMATION)
+                        intent.putExtra(DEVICE_IDS, devicesIds.toLongArray())
+                        intent.putExtra("automationId", id)
+                        intent.putExtra("turnOnWhenEntering", true) // TODO: Unhardcode
+                        intent.putExtra("latitude", automation.latitude)
+                        intent.putExtra("longitude", automation.longitude)
+                        intent.putExtra("radius", 100f) // TODO: Unhardcode
+                        application.applicationContext.sendBroadcast(intent)
+                        Log.d(TAG, "[addAutomation#geolocationAutomation]: Broadcast sent")
+
+                    }
+                }
+
+                is ShakeAutomation -> {
+                    viewModelScope.launch {
+                        Log.d(TAG, "[addAutomation#shakeAutomation]: Request to save automation in database")
+                        val id = repository.addAutomation(automation, scenes.toList())
+                        Log.d(TAG, "[addAutomation#shakeAutomation]: Automation successfully saved with id $id")
+                        SnackbarManager.showMessage(
+                            "${automation.name} added for scenes ${
+                                scenes.map { it.name }.joinToString { it }
+                            }."
+                        )
+                        val scenesWithDevices =
+                            repository.getSceneByIdWithDevices(scenes.toList().map { it.sceneId })
+                        val devicesIds =
+                            scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
+                        Log.d(TAG, "[addAutomation#shakeAutomation]: Sending broadcast")
                         val intent = Intent(SHAKE_AUTOMATION)
                         intent.putExtra(DEVICE_IDS, devicesIds.toLongArray())
                         application.applicationContext.sendBroadcast(intent)
-                        println("Broadcast sent")
-//                        registerShakeSensor(sensorManager) {
-//                            println("Shake detected!! - Automation id: $id")
-//                            val intent = Intent(
-//                                application.applicationContext,
-//                                UdpForegroundService::class.java
-//                            )
-//                            intent.putExtra("deviceId", devicesIds.toLongArray())
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                application.applicationContext.startForegroundService(
-//                                    intent
-//                                )
-//                            } else {
-//                                application.applicationContext.startService(intent)
-//                            }
-//                        }
+                        Log.d(TAG, "[addAutomation#shakeAutomation]: Broadcast sent")
                     }
                 }
 
                 else -> {
                     viewModelScope.launch {
-                        SnackbarManager.showMessage("Automation type not supported.")
+                        Log.wtf(TAG, "[addAutomation]: Unknown automation type")
                     }
                 }
             }

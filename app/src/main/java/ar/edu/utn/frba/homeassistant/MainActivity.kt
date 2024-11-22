@@ -56,12 +56,15 @@ import dagger.hilt.android.AndroidEntryPoint
 
 typealias GetCurrentCoordinates = (onSuccess: (Double, Double) -> Unit) -> Unit
 
+const val GLOBAL_TAG = "HOME_ASSISTANT_TRACE"
+const val TAG = "$GLOBAL_TAG#MAIN_ACTIVITY"
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var geofencingClient: GeofencingClient
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val TAG = "MainActivity"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
