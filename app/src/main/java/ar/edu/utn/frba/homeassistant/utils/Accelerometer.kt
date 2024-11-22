@@ -46,3 +46,8 @@ fun registerShakeSensor(sensorManager: SensorManager, callback: () -> Unit){
     sensorManager.registerListener(ShakeEventListener(callback = callback), sensorShake, SensorManager.SENSOR_DELAY_NORMAL)
 }
 
+fun unregisterShakeSensor(sensorManager: SensorManager, callback: () -> Unit){
+    val sensorShake = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
+    sensorManager.unregisterListener(ShakeEventListener(callback = callback), sensorShake)
+}
+
