@@ -42,7 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ar.edu.utn.frba.homeassistant.network.UdpForegroundService
+import ar.edu.utn.frba.homeassistant.network.ShakeAutomationForegroundService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.ui.automations.AutomationsTabContent
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent
@@ -50,7 +50,6 @@ import ar.edu.utn.frba.homeassistant.ui.scenes.ScenesTabContent
 import ar.edu.utn.frba.homeassistant.ui.theme.HomeAssistantTheme
 import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,10 +60,7 @@ const val TAG = "$GLOBAL_TAG#MAIN_ACTIVITY"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private lateinit var geofencingClient: GeofencingClient
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,14 +69,14 @@ class MainActivity : ComponentActivity() {
         val alarmManager = this.getSystemService(AlarmManager::class.java)
 
 
+        Log.d(TAG, "[onCreate]: Checking if we can schedule exact alarms")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             when {
                 // If permission is granted, proceed with scheduling exact alarms.
                 alarmManager.canScheduleExactAlarms() -> {
-                    println("Can schedule exact alarms")
-                }
-
-                else -> {
+                    Log.d(TAG, "[onCreate]: We can schedule exact alarms")
+                } else -> {
+                    Log.d(TAG, "[onCreate]: We can't schedule exact alarms, asking user to go to settings")
                     // Ask users to go to exact alarm page in system settings.
                     this.startActivity(Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
                 }
@@ -90,30 +86,34 @@ class MainActivity : ComponentActivity() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // TODO: ATM you will need to activate notifications manually. We should add an alert.
-            val channelId = "ALARM_AUTOMATIONS"
-            val channelName = "Automations Notifications"
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-            notificationManager.createNotificationChannel(channel)
+//            val channelId = "ALARM_AUTOMATIONS"
+//            val channelName = "Automations Notifications"
+//            val channel =
+//                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+//            notificationManager.createNotificationChannel(channel)
+            Log.d(TAG, "[onCreate]: Creating Shake Automation Foreground Service channel")
             val udpChannel = NotificationChannel(
-                "UDP_CHANNEL",
-                "Shake Automation",
+                "SHAKE_SERVICE_CHANNEL",
+                "Shake Automation Foreground Service",
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(udpChannel)
         } else {
-
+            Log.d(TAG, "[onCreate]: Not creating channel because we are not in Oreo")
         }
 
+        Log.d(TAG, "[onCreate]: Starting Shake Automation Foreground Service")
         val intent = Intent(
             this,
-            UdpForegroundService::class.java
+            ShakeAutomationForegroundService::class.java
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "[onCreate]: Starting Shake Automation Foreground Service with startForegroundService")
             this.startForegroundService(
                 intent
             )
         } else {
+            Log.d(TAG, "[onCreate]: Starting Shake Automation Foreground Service with startService")
             this.startService(intent)
         }
 
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     if (location != null) {
-                        Log.i(TAG, "COORDINATES: $location")
+                        Log.i(TAG, "[Location]: ${location.latitude}, ${location.longitude}")
                         onSuccess(location.latitude, location.longitude)
                     }
                 }
@@ -134,7 +134,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-
             // Theme created by following this guide: https://developer.android.com/develop/ui/compose/designsystems/material3?hl=es-419
             // Theme Related files were autogenerated by using this tool: https://material-foundation.github.io/material-theme-builder/
             HomeAssistantTheme {
@@ -144,61 +143,7 @@ class MainActivity : ComponentActivity() {
 
         // LOCATION
         requestLocationPermissions(this)
-
-        // GEOFENCING
-//        // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
-//        geofencingClient = LocationServices.getGeofencingClient(this)
-//        val latitude = -34.598467238301744
-//        val longitude = -58.42012906027254
-//        val radius = 100f
-//        val geofence = buildGeofence("TEST", latitude, longitude, radius)
-//        val geofenceRequest = buildGeofenceRequest(geofence)
-//        val pendingIntent = PendingIntent.getBroadcast(
-//            this,
-//            0,
-//            Intent(this, GeofenceBroadcastReceiver::class.java),
-//            PendingIntent.FLAG_MUTABLE
-//        )
-//
-//        // It must be there or linter will fail.
-//        if (ActivityCompat.checkSelfPermission(
-//                this,
-//                ACCESS_FINE_LOCATION
-//            ) == PackageManager.PERMISSION_GRANTED
-//        ) {
-//            geofencingClient.addGeofences(geofenceRequest, pendingIntent).run {
-//                addOnSuccessListener {
-//                    Log.d("Geofence", "Geofence added")
-//                }
-//                addOnFailureListener { exception ->
-//                    Log.d("Geofence", "Geofence not added: ${exception}")
-//                }
-//            }
-//        } else {
-//            // TODO: What should we do if we don't have permissions?
-//        }
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                println("Registering shake receiver - TIRAMISU")
-//                registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"), RECEIVER_NOT_EXPORTED)
-//            } else {
-//                println("Registering shake receiver - Oreo")
-//                registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"))
-//            }
-//        } else {
-//            println("Registering shake receiver - Pre-Oreo")
-//            registerReceiver(ShakeReceiver(), IntentFilter("shake.detector"))
-//        }
-//    }
-//
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        unregisterReceiver(ShakeReceiver())
-//    }
 }
 
 @Preview

@@ -7,17 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
-import ar.edu.utn.frba.homeassistant.network.GEO_AUTOMATION
-import ar.edu.utn.frba.homeassistant.network.SHAKE_AUTOMATION
+import ar.edu.utn.frba.homeassistant.network.REGISTER_SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.utils.cancelAlarm
+import ar.edu.utn.frba.homeassistant.utils.registerGeofenceReceiver
 import ar.edu.utn.frba.homeassistant.utils.setAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -43,22 +46,40 @@ class AutomationsViewModel @Inject constructor(
 
     fun toggleAutomation(automation: IAutomationWithScenes, enable: Boolean) {
         viewModelScope.launch {
-            automation.automation.automationId?.let {
-                if (enable) {
-                    setAlarm(
-                        application.applicationContext,
-                        it,
-                        automation.automation as ClockAutomation
-                    )
-                } else {
-                    cancelAlarm(
-                        application.applicationContext,
-                        it,
-                        automation.automation as ClockAutomation
-                    )
+            val scenesWithDevices =
+                repository.getSceneByIdWithDevices(automation.scenes.toList().map { it.sceneId })
+            val devicesIds =
+                scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
+
+            when(automation){
+                is ClockAutomationWithScenes -> {
+                    if (enable) {
+                        setAlarm(
+                            application.applicationContext,
+                            automation.automation.automationId!!,
+                            automation.automation,
+                            devicesIds.toLongArray()
+                        )
+                    } else {
+                        cancelAlarm(
+                            application.applicationContext,
+                            automation.automation.automationId!!,
+                            automation.automation,
+                            devicesIds.toLongArray()
+                        )
+                    }
+                    repository.updateAutomation((automation.automation).copy(enabled = enable))
+                }
+                is GeolocationAutomationWithScenes -> {
+                    TODO("Not yet implemented")
+                }
+                is ShakeAutomationWithScenes -> {
+                    TODO("Not yet implemented")
+                }
+                else -> {
+                    Log.wtf(TAG, "[toggleAutomation]: Unknown automation type")
                 }
 
-                repository.updateAutomation((automation.automation as ClockAutomation).copy(enabled = enable))
             }
 
         }
@@ -80,7 +101,11 @@ class AutomationsViewModel @Inject constructor(
                             }."
                         )
                         Log.d(TAG, "[addAutomation#clockAutomation]: Setting alarm for automation")
-                        setAlarm(application.applicationContext, id, automation)
+                        val scenesWithDevices =
+                            repository.getSceneByIdWithDevices(scenes.toList().map { it.sceneId })
+                        val devicesIds =
+                            scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
+                        setAlarm(application.applicationContext, id, automation, devicesIds.toLongArray())
                     }
                 }
 
@@ -95,25 +120,12 @@ class AutomationsViewModel @Inject constructor(
                                 scenes.map { it.name }.joinToString { it }
                             }."
                         )
-                        SnackbarManager.showMessage(
-                            "${automation.name} added for scenes ${
-                                scenes.map { it.name }.joinToString { it }
-                            }."
-                        )
                         val scenesWithDevices =
                             repository.getSceneByIdWithDevices(scenes.toList().map { it.sceneId })
                         val devicesIds =
                             scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
-                        Log.d(TAG, "[addAutomation#geolocationAutomation]: Sending broadcast")
-                        val intent = Intent(GEO_AUTOMATION)
-                        intent.putExtra(DEVICE_IDS, devicesIds.toLongArray())
-                        intent.putExtra("automationId", id)
-                        intent.putExtra("turnOnWhenEntering", true) // TODO: Unhardcode
-                        intent.putExtra("latitude", automation.latitude)
-                        intent.putExtra("longitude", automation.longitude)
-                        intent.putExtra("radius", 100f) // TODO: Unhardcode
-                        application.applicationContext.sendBroadcast(intent)
-                        Log.d(TAG, "[addAutomation#geolocationAutomation]: Broadcast sent")
+
+                        registerGeofenceReceiver(application.applicationContext, devicesIds.toLongArray(), automation)
 
                     }
                 }
@@ -133,7 +145,7 @@ class AutomationsViewModel @Inject constructor(
                         val devicesIds =
                             scenesWithDevices.flatMap { it.devices }.map { it.deviceId }
                         Log.d(TAG, "[addAutomation#shakeAutomation]: Sending broadcast")
-                        val intent = Intent(SHAKE_AUTOMATION)
+                        val intent = Intent(REGISTER_SHAKE_AUTOMATION)
                         intent.putExtra(DEVICE_IDS, devicesIds.toLongArray())
                         application.applicationContext.sendBroadcast(intent)
                         Log.d(TAG, "[addAutomation#shakeAutomation]: Broadcast sent")

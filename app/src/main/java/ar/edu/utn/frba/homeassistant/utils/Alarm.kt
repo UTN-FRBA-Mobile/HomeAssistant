@@ -5,16 +5,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.utils.Receivers.AlarmReceiver
+import ar.edu.utn.frba.homeassistant.utils.receivers.AlarmReceiver
 import java.util.Calendar
 
 fun setAlarm(
     context: Context,
     id: Long,
-    clockAutomation: ClockAutomation
+    clockAutomation: ClockAutomation,
+    deviceIds: LongArray
 ) {
     val intent = Intent(context, AlarmReceiver::class.java)
     intent.putExtra("automationId", id)
+    intent.putExtra("deviceIds", deviceIds)
+    intent.putExtra("shouldTurnOn", clockAutomation.shouldTurnOn)
 
     val alarmManager = context.getSystemService(AlarmManager::class.java)
     val time = clockAutomation.time
@@ -72,9 +75,12 @@ fun setAlarm(
     }
 }
 
-fun cancelAlarm(context: Context, id: Long, clockAutomation: ClockAutomation) {
+fun cancelAlarm(context: Context, id: Long, clockAutomation: ClockAutomation, deviceIds: LongArray) {
     val alarmManager = context.getSystemService(AlarmManager::class.java)
     val intent = Intent(context, AlarmReceiver::class.java)
+    intent.putExtra("automationId", id)
+    intent.putExtra("deviceIds", deviceIds)
+    intent.putExtra("shouldTurnOn", clockAutomation.shouldTurnOn)
     val days = mapOf(
         "Monday" to clockAutomation.monday,
         "Tuesday" to clockAutomation.tuesday,

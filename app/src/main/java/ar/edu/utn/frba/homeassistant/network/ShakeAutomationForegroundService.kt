@@ -1,0 +1,127 @@
+package ar.edu.utn.frba.homeassistant.network
+
+import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.SensorManager
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
+import ar.edu.utn.frba.homeassistant.R
+import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+const val REGISTER_SHAKE_AUTOMATION = "SHAKE_AUTOMATION"
+const val UNREGISTER_SHAKE_AUTOMATION = "UNREGISTER_SHAKE_AUTOMATION"
+
+const val DEVICE_IDS = "DEVICE_IDS"
+const val TAG = "${GLOBAL_TAG}#UDP_FOREGROUND_SERVICE"
+
+/**
+ * BroadcastReceiver that listens for Shake Automation registration requests
+ *
+ * You have to send an Intent with action REGISTER_SHAKE_AUTOMATION or UNREGISTER_SHAKE_AUTOMATION
+ */
+class ShakeAutomationRegistrationBroadcastReceiver :
+    BroadcastReceiver() {
+    private lateinit var sensorManager: SensorManager
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val action = intent?.action
+        if (action == null) {
+            Log.d(TAG, "[onReceive]: No action received")
+            return
+        }
+        Log.d(TAG, "[onReceive]: [$action] registration request received")
+        val deviceIds = intent.getLongArrayExtra(DEVICE_IDS)
+
+        when (action) {
+            REGISTER_SHAKE_AUTOMATION -> {
+                Log.d(TAG, "[onReceive]: Registering Shake Automation for devices: ${deviceIds?.contentToString()}")
+                registerShakeAutomation(deviceIds)
+            }
+            UNREGISTER_SHAKE_AUTOMATION -> {
+                Log.d(TAG, "[onReceive]: Unregistering Shake Automation for devices: ${deviceIds?.contentToString()}")
+                unregisterShakeAutomation(deviceIds)
+            }
+        }
+
+
+    }
+
+    private fun registerShakeAutomation(deviceIds: LongArray?) {
+        registerShakeSensor(sensorManager) {
+            CoroutineScope(Dispatchers.IO).launch {
+                deviceIds?.forEach {
+                    UdpService.sendUdpMessage(it, "toggle:on")
+                }
+            }
+        }
+    }
+
+
+    private fun unregisterShakeAutomation(deviceIds: LongArray?) {
+        TODO("Not yet implemented")
+    }
+
+    fun setSensorManager(sensorManager: SensorManager) {
+        this.sensorManager = sensorManager
+    }
+}
+
+const val TAG_FOREGROUND_SERVICE = "${GLOBAL_TAG}#SHAKE_AUTOMATION_FOREGROUND_SERVICE"
+class ShakeAutomationForegroundService : Service() {
+    private lateinit var broadcastReceiver: ShakeAutomationRegistrationBroadcastReceiver
+
+    override fun onCreate() {
+        Log.d(TAG_FOREGROUND_SERVICE, "[onCreate]: Shake Automation Foreground Service started")
+        super.onCreate()
+        val filter = IntentFilter().apply {
+            addAction(REGISTER_SHAKE_AUTOMATION)
+        }
+
+        val sensorManager: SensorManager =
+            application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
+        broadcastReceiver = ShakeAutomationRegistrationBroadcastReceiver()
+        broadcastReceiver.setSensorManager(sensorManager)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Log.d(TAG_FOREGROUND_SERVICE, "[onCreate]: Registering broadcast receiver for versions >= TIRAMISU")
+                registerReceiver(broadcastReceiver, filter, RECEIVER_EXPORTED)
+            } else {
+                Log.wtf(TAG_FOREGROUND_SERVICE, "[onCreate]: Can't register broadcast receiver for versions < TIRAMISU. Not implemented yet")
+            }
+        } else {
+            Log.wtf(TAG_FOREGROUND_SERVICE, "[onCreate]: Can't register broadcast receiver for versions < OREO. Not implemented yet")
+        }
+
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG_FOREGROUND_SERVICE, "[onStartCommand]: Shake Automation Foreground Service started")
+        val notification = NotificationCompat.Builder(this, "SHAKE_SERVICE_CHANNEL")
+            .setContentTitle("Home Assistant")
+            .setContentText("Service running")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .build()
+
+        startForeground(1, notification)
+
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG_FOREGROUND_SERVICE, "[onDestroy]: Shake Automation Foreground Service stopped")
+        unregisterReceiver(broadcastReceiver)
+    }
+}

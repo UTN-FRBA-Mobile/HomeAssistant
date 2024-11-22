@@ -1,10 +1,9 @@
-package ar.edu.utn.frba.homeassistant.utils.Receivers
+package ar.edu.utn.frba.homeassistant.utils.receivers
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
 import ar.edu.utn.frba.homeassistant.network.UdpService
