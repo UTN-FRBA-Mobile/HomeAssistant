@@ -10,12 +10,14 @@ import kotlin.math.sqrt
 // Base: https://www.geeksforgeeks.org/how-to-detect-shake-event-in-android/
 class ShakeEventListener(
     private val callback: () -> Unit,
-    private val threshold: Float = 12f
+    private val threshold: Float = 12f,
+    private val debounce: Long = 1000L
 ) : SensorEventListener {
 
     private var currentAcceleration = 0f
     private var lastAcceleration = 0f
     private var acceleration = 10f
+    private var lastShakeDetectedTimestamp: Long = 0L
 
     init {
         currentAcceleration = SensorManager.GRAVITY_EARTH
@@ -31,7 +33,10 @@ class ShakeEventListener(
         currentAcceleration = sqrt(x * x + y * y + z * z.toDouble()).toFloat()
         val delta: Float = currentAcceleration - lastAcceleration
         acceleration = acceleration * 0.9f + delta
-        if (currentAcceleration > threshold) {
+
+        val currentTime = System.currentTimeMillis()
+        if (currentAcceleration > threshold && currentTime - lastShakeDetectedTimestamp > debounce) {
+            lastShakeDetectedTimestamp = currentTime
             callback()
         }
     }
