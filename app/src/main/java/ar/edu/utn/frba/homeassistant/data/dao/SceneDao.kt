@@ -22,7 +22,7 @@ interface SceneDao {
 
     @Transaction
     @Query("SELECT * FROM scene WHERE sceneId IN(:sceneIds)")
-    suspend fun getSceneByIdWithDevices(sceneIds: List<Long>): List<SceneWithDevices>
+    suspend fun getScenesWithDevicesByIds(sceneIds: List<Long>): List<SceneWithDevices>
 
     @Insert
     suspend fun insert(scene: Scene): Long

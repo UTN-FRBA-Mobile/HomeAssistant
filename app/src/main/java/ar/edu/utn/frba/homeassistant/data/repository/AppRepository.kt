@@ -37,7 +37,9 @@ class AppRepository @Inject constructor(
 
     fun getScenes() = sceneDao.getAll()
 
-    suspend fun getSceneByIdWithDevices(sceneIds: List<Long>) = sceneDao.getSceneByIdWithDevices(sceneIds)
+    private suspend fun getScenesWithDevicesByIds(sceneIds: List<Long>) = sceneDao.getScenesWithDevicesByIds(sceneIds)
+
+    suspend fun getScenesDevicesIds(sceneIds: List<Long>) = getScenesWithDevicesByIds(sceneIds).flatMap { it.devices }.map { it.deviceId }
 
     suspend fun addScene(name: String, devices: List<Device>) {
         val sceneId = sceneDao.insert(Scene(name = name))
