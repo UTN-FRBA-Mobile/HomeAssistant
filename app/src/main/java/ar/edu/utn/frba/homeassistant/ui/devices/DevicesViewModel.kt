@@ -30,6 +30,12 @@ class DevicesViewModel @Inject constructor(
         }
     }
 
+    fun updateDevice(device: Device) {
+        viewModelScope.launch {
+            repository.updateDevice(device)
+        }
+    }
+
     fun deleteDevice(device: Device) {
         viewModelScope.launch {
             repository.deleteDevice(device)
