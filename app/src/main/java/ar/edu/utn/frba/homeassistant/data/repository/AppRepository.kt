@@ -24,6 +24,8 @@ class AppRepository @Inject constructor(
 
     suspend fun getDeviceById(id: Long) = deviceDao.getById(id)
 
+    suspend fun getDevicesByIds(ids: List<Long>) = deviceDao.getByIds(ids)
+
     suspend fun addDevice(id: Long, name: String, type: String) =
         deviceDao.insert(Device(deviceId = id, name = name, type = type))
 

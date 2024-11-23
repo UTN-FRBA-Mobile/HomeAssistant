@@ -20,8 +20,6 @@ import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
     Scene::class,
     SceneDeviceCrossRef::class,
     ClockAutomation::class,
-    // This should be an unique table, with type as composite pk with automationId and sceneid
-    // IDK How to do it with room
     ClockAutomationSceneCrossRef::class,
     ShakeAutomationSceneCrossRef::class,
     GeolocationAutomationSceneCrossRef::class,

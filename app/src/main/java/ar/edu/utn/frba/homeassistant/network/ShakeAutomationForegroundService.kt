@@ -12,10 +12,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.R
+import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 const val REGISTER_SHAKE_AUTOMATION = "SHAKE_AUTOMATION"
 const val UNREGISTER_SHAKE_AUTOMATION = "UNREGISTER_SHAKE_AUTOMATION"
@@ -31,6 +34,7 @@ const val TAG = "${GLOBAL_TAG}#UDP_FOREGROUND_SERVICE"
 class ShakeAutomationRegistrationBroadcastReceiver :
     BroadcastReceiver() {
     private lateinit var sensorManager: SensorManager
+    private lateinit var appRepository: AppRepository
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action
@@ -58,8 +62,14 @@ class ShakeAutomationRegistrationBroadcastReceiver :
     private fun registerShakeAutomation(deviceIds: LongArray?) {
         registerShakeSensor(sensorManager) {
             CoroutineScope(Dispatchers.IO).launch {
-                deviceIds?.forEach {
-                    UdpService.sendUdpMessage(it, "toggle:on")
+                Log.d(TAG, "[registerShakeAutomation]: Shake detected")
+                deviceIds?.let {
+                    val devices = appRepository.getDevicesByIds(it.toList())
+                    val isOn = devices.all { device -> device.isOn }
+                    devices.forEach { device ->
+                        UdpService.sendUdpMessage(device.deviceId, if (isOn) "toggle:off" else "toggle:on")
+                        appRepository.updateDevice(device.copy(isOn = !isOn))
+                    }
                 }
             }
         }
@@ -73,11 +83,20 @@ class ShakeAutomationRegistrationBroadcastReceiver :
     fun setSensorManager(sensorManager: SensorManager) {
         this.sensorManager = sensorManager
     }
+
+    fun setAppRepository(appRepository: AppRepository) {
+        this.appRepository = appRepository
+    }
 }
 
 const val TAG_FOREGROUND_SERVICE = "${GLOBAL_TAG}#SHAKE_AUTOMATION_FOREGROUND_SERVICE"
+
+@AndroidEntryPoint
 class ShakeAutomationForegroundService : Service() {
     private lateinit var broadcastReceiver: ShakeAutomationRegistrationBroadcastReceiver
+
+    @Inject
+    lateinit var appRepository: AppRepository
 
     override fun onCreate() {
         Log.d(TAG_FOREGROUND_SERVICE, "[onCreate]: Shake Automation Foreground Service started")
@@ -90,6 +109,7 @@ class ShakeAutomationForegroundService : Service() {
             application.applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
         broadcastReceiver = ShakeAutomationRegistrationBroadcastReceiver()
         broadcastReceiver.setSensorManager(sensorManager)
+        broadcastReceiver.setAppRepository(appRepository)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

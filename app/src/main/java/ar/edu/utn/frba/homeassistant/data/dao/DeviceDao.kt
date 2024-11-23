@@ -16,6 +16,9 @@ interface DeviceDao {
     @Query("SELECT * FROM device WHERE deviceId = :id")
     suspend fun getById(id: Long): Device?
 
+    @Query("SELECT * FROM device WHERE deviceId IN (:ids)")
+    suspend fun getByIds(ids: List<Long>): List<Device>
+
     @Insert
     suspend fun insert(device: Device)
 
