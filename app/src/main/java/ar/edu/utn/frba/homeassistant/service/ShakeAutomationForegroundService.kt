@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.homeassistant.network
+package ar.edu.utn.frba.homeassistant.service
 
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -13,14 +13,17 @@ import androidx.core.app.NotificationCompat
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
+import ar.edu.utn.frba.homeassistant.network.UdpService
+import ar.edu.utn.frba.homeassistant.utils.ShakeEventListener
 import ar.edu.utn.frba.homeassistant.utils.registerShakeSensor
+import ar.edu.utn.frba.homeassistant.utils.unregisterShakeSensor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-const val REGISTER_SHAKE_AUTOMATION = "SHAKE_AUTOMATION"
+const val REGISTER_SHAKE_AUTOMATION = "REGISTER_SHAKE_AUTOMATION"
 const val UNREGISTER_SHAKE_AUTOMATION = "UNREGISTER_SHAKE_AUTOMATION"
 
 const val DEVICE_IDS = "DEVICE_IDS"
@@ -35,6 +38,7 @@ class ShakeAutomationRegistrationBroadcastReceiver :
     BroadcastReceiver() {
     private lateinit var sensorManager: SensorManager
     private lateinit var appRepository: AppRepository
+    private lateinit var shakeEventListener: ShakeEventListener
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action
@@ -42,7 +46,7 @@ class ShakeAutomationRegistrationBroadcastReceiver :
             Log.d(TAG, "[onReceive]: No action received")
             return
         }
-        Log.d(TAG, "[onReceive]: [$action] registration request received")
+        Log.d(TAG, "[onReceive]: [$action] request received")
         val deviceIds = intent.getLongArrayExtra(DEVICE_IDS)
 
         when (action) {
@@ -52,7 +56,7 @@ class ShakeAutomationRegistrationBroadcastReceiver :
             }
             UNREGISTER_SHAKE_AUTOMATION -> {
                 Log.d(TAG, "[onReceive]: Unregistering Shake Automation for devices: ${deviceIds?.contentToString()}")
-                unregisterShakeAutomation(deviceIds)
+                unregisterShakeAutomation()
             }
         }
 
@@ -60,24 +64,28 @@ class ShakeAutomationRegistrationBroadcastReceiver :
     }
 
     private fun registerShakeAutomation(deviceIds: LongArray?) {
-        registerShakeSensor(sensorManager) {
+        shakeEventListener = ShakeEventListener(callback = {
             CoroutineScope(Dispatchers.IO).launch {
                 Log.d(TAG, "[registerShakeAutomation]: Shake detected")
                 deviceIds?.let {
                     val devices = appRepository.getDevicesByIds(it.toList())
                     val isOn = devices.all { device -> device.isOn }
                     devices.forEach { device ->
-                        UdpService.sendUdpMessage(device.deviceId, if (isOn) "toggle:off" else "toggle:on")
+                        UdpService.sendUdpMessage(
+                            device.deviceId,
+                            if (isOn) "toggle:off" else "toggle:on"
+                        )
                         appRepository.updateDevice(device.copy(isOn = !isOn))
                     }
                 }
             }
-        }
+        })
+        registerShakeSensor(sensorManager, shakeEventListener)
     }
 
 
-    private fun unregisterShakeAutomation(deviceIds: LongArray?) {
-        TODO("Not yet implemented")
+    private fun unregisterShakeAutomation() {
+        unregisterShakeSensor(sensorManager, shakeEventListener)
     }
 
     fun setSensorManager(sensorManager: SensorManager) {
@@ -103,6 +111,7 @@ class ShakeAutomationForegroundService : Service() {
         super.onCreate()
         val filter = IntentFilter().apply {
             addAction(REGISTER_SHAKE_AUTOMATION)
+            addAction(UNREGISTER_SHAKE_AUTOMATION)
         }
 
         val sensorManager: SensorManager =

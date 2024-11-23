@@ -16,8 +16,9 @@ import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
-import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
-import ar.edu.utn.frba.homeassistant.network.REGISTER_SHAKE_AUTOMATION
+import ar.edu.utn.frba.homeassistant.service.DEVICE_IDS
+import ar.edu.utn.frba.homeassistant.service.REGISTER_SHAKE_AUTOMATION
+import ar.edu.utn.frba.homeassistant.service.UNREGISTER_SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.utils.cancelAlarm
 import ar.edu.utn.frba.homeassistant.utils.registerGeofenceReceiver
 import ar.edu.utn.frba.homeassistant.utils.setAlarm
@@ -40,6 +41,13 @@ class AutomationsViewModel @Inject constructor(
     fun deleteAutomation(automation: IAutomation) {
         viewModelScope.launch {
             repository.deleteAutomation(automation)
+            when (automation) {
+                is ShakeAutomation -> {
+                    val intent = Intent(UNREGISTER_SHAKE_AUTOMATION)
+                    application.applicationContext.sendBroadcast(intent)
+                }
+                // TODO: Add other automations unregister
+            }
         }
     }
 

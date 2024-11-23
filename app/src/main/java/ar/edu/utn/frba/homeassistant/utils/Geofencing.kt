@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
+import ar.edu.utn.frba.homeassistant.service.DEVICE_IDS
 import ar.edu.utn.frba.homeassistant.utils.receivers.GeofenceBroadcastReceiver
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
@@ -55,7 +55,7 @@ fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation:
     Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Registering geolocation automation")
     val latitude = automation.latitude
     val longitude = automation.longitude
-    val radius = /*automation.radius*/ 100f;
+    val radius = /*automation.radius*/ 100f
     val id = automation.automationId
 
     if (latitude == 0.0 || longitude == 0.0) {

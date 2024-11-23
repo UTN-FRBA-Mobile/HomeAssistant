@@ -56,10 +56,10 @@
             android:value="barcode_ui"/>
 
         <service
-            android:name=".network.ShakeAutomationForegroundService"
+            android:name=".service.ShakeAutomationForegroundService"
             android:foregroundServiceType="dataSync" />
 
-        <receiver android:name=".network.ShakeAutomationRegistrationBroadcastReceiver"/>
+        <receiver android:name=".service.ShakeAutomationRegistrationBroadcastReceiver"/>
     </application>
 
 </manifest>

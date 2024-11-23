@@ -42,7 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ar.edu.utn.frba.homeassistant.network.ShakeAutomationForegroundService
+import ar.edu.utn.frba.homeassistant.service.ShakeAutomationForegroundService
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import ar.edu.utn.frba.homeassistant.ui.automations.AutomationsTabContent
 import ar.edu.utn.frba.homeassistant.ui.devices.DevicesTabContent

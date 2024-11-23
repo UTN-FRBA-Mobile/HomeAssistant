@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
-import ar.edu.utn.frba.homeassistant.network.DEVICE_IDS
+import ar.edu.utn.frba.homeassistant.service.DEVICE_IDS
 import ar.edu.utn.frba.homeassistant.network.UdpService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-const val TAG = "$GLOBAL_TAG#GEOFENCE_BROADCAST_RECEIVER";
+const val TAG = "$GLOBAL_TAG#GEOFENCE_BROADCAST_RECEIVER"
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
