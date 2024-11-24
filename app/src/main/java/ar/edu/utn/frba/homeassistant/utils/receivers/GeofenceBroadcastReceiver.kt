@@ -5,18 +5,25 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
+import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.service.DEVICE_IDS
 import ar.edu.utn.frba.homeassistant.network.UdpService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent.fromIntent
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 const val TAG = "$GLOBAL_TAG#GEOFENCE_BROADCAST_RECEIVER"
 
+@AndroidEntryPoint
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
+    @Inject
+    lateinit var appRepository: AppRepository
+
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "[onReceive]: Geofence broadcast received")
         val geofencingEvent = fromIntent(intent)
@@ -44,11 +51,13 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                         Log.d(TAG, "[onReceive]: Sending UDP message to device $it - toggle:on")
                         CoroutineScope(Dispatchers.IO).launch {
                             UdpService.sendUdpMessage(it, "toggle:on")
+                            appRepository.updateIsOn(it, true)
                         }
                     } else {
                         Log.d(TAG, "[onReceive]: Sending UDP message to device $it - toggle:off")
                         CoroutineScope(Dispatchers.IO).launch {
                             UdpService.sendUdpMessage(it, "toggle:off")
+                            appRepository.updateIsOn(it, false)
                         }
                     }
                 }
@@ -59,11 +68,13 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                         Log.d(TAG, "[onReceive]: Sending UDP message to device $it - toggle:off")
                         CoroutineScope(Dispatchers.IO).launch {
                             UdpService.sendUdpMessage(it, "toggle:off")
+                            appRepository.updateIsOn(it, false)
                         }
                     } else {
                         Log.d(TAG, "[onReceive]: Sending UDP message to device $it - toggle:on")
                         CoroutineScope(Dispatchers.IO).launch {
                             UdpService.sendUdpMessage(it, "toggle:on")
+                            appRepository.updateIsOn(it, true)
                         }
                     }
                 }
