@@ -19,6 +19,7 @@ import ar.edu.utn.frba.homeassistant.service.UNREGISTER_SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.utils.cancelAlarm
 import ar.edu.utn.frba.homeassistant.utils.registerGeofenceReceiver
 import ar.edu.utn.frba.homeassistant.utils.setAlarm
+import ar.edu.utn.frba.homeassistant.utils.unregisterGeofenceReceiver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,7 +64,12 @@ class AutomationsViewModel @Inject constructor(
                 }
 
                 is GeolocationAutomation -> {
-                    TODO("Not yet implemented")
+                    if (enable) {
+                        registerGeolocationAutomation(devicesIds, automation)
+                    } else {
+                        unregisterGeolocationAutomation(devicesIds, automation)
+                    }
+                    repository.updateAutomation(automation.copy(enabled = enable))
                 }
 
                 is ShakeAutomation -> {
@@ -156,6 +162,17 @@ class AutomationsViewModel @Inject constructor(
         automation: GeolocationAutomation
     ) {
         registerGeofenceReceiver(
+            application.applicationContext,
+            devicesIds.toLongArray(),
+            automation
+        )
+    }
+
+    private fun unregisterGeolocationAutomation(
+        devicesIds: List<Long>,
+        automation: GeolocationAutomation
+    ) {
+        unregisterGeofenceReceiver(
             application.applicationContext,
             devicesIds.toLongArray(),
             automation

@@ -98,3 +98,40 @@ fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation:
         Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: No permissions to add geofences")
     }
 }
+
+
+fun unregisterGeofenceReceiver(context: Context, deviceIds: LongArray, automation: GeolocationAutomation) {
+
+    val id = automation.automationId
+    val geofenceBroadcastIntent = Intent(context, GeofenceBroadcastReceiver::class.java)
+    geofenceBroadcastIntent.putExtra("automationId", id)
+    geofenceBroadcastIntent.putExtra(DEVICE_IDS, deviceIds)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        0,
+        geofenceBroadcastIntent,
+        PendingIntent.FLAG_MUTABLE
+    )
+
+    Log.d(GEOFENCE_TAG, "[unregisterGeofenceReceiver]: Attempting to remove geofences: $id")
+
+    val geofencingClient = LocationServices.getGeofencingClient(context)
+
+    // Vérifier les permissions nécessaires avant d'agir
+    if (ActivityCompat.checkSelfPermission(
+            context,
+            ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    ) {
+        geofencingClient.removeGeofences(pendingIntent).run {
+            addOnSuccessListener {
+                Log.d(GEOFENCE_TAG, "[unregisterGeofenceReceiver#removeGeofences#onSuccessListener]: Geofences removed successfully")
+            }
+            addOnFailureListener { exception ->
+                Log.e(GEOFENCE_TAG, "[unregisterGeofenceReceiver#removeGeofences#onFailureListener]: Error removing geofences", exception)
+            }
+        }
+    } else {
+        Log.d(GEOFENCE_TAG, "[unregisterGeofenceReceiver]: No permissions to remove geofences")
+    }
+}
