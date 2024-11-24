@@ -10,8 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.Device
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneWithDevices
@@ -28,14 +30,14 @@ fun ScenesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Scenes") }
+                title = { Text(stringResource(R.string.my_scenes)) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 navController.navigate("addScene")
             }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Scene")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_scene))
             }
         }
     ) { paddingValues ->
@@ -83,16 +85,16 @@ fun SceneItem(
                     onDelete()
                     showDialog = false
                 }) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 Button(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
-            title = { Text("Delete Scene") },
-            text = { Text("Are you sure you want to delete this scene?") }
+            title = { Text(stringResource(R.string.delete_scene)) },
+            text = { Text(stringResource(R.string.sure_to_delete_scene)) }
         )
     }
 
@@ -124,7 +126,7 @@ fun SceneItem(
             IconButton(onClick = {
                 showDialog = true  // Show confirmation dialog
             }) {
-                Icon(Icons.Filled.Delete, contentDescription = "Delete Scene")
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_scene))
             }
         }
         if (expanded) {

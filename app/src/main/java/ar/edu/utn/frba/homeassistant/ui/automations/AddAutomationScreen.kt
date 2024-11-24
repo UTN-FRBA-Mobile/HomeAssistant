@@ -20,10 +20,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.ClockAutomationForm
@@ -66,10 +68,10 @@ fun AutomationForm(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add new automation") },
+                title = { Text(stringResource(R.string.add_new_auto)) },
                 navigationIcon = {
                     IconButton(onClick = { goBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -89,9 +91,9 @@ fun AutomationForm(
                 DropdownMenuComponent(
                     selectedOption = selectedAutomation,
                     options = listOf(
-                        "Clock Automation",
-                        "Geolocation Automation",
-                        "Shake Automation"
+                        stringResource(R.string.clock_automation),
+                        stringResource(R.string.geolocation_automation),
+                        stringResource(R.string.shake_automation)
                     ),
                     onOptionSelected = { selectedAutomation = it },
                     modifier = Modifier.fillMaxWidth()
@@ -112,9 +114,9 @@ fun AutomationForm(
 
                 // Display fields based on selected automation
                 when (selectedAutomation) {
-                    "Clock Automation" -> ClockAutomationForm(selectedScenes, handleCreate)
-                    "Geolocation Automation" -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates, selectedScenes, handleCreate)
-                    "Shake Automation" -> ShakeAutomationForm(selectedScenes, handleCreate)
+                    stringResource(R.string.clock_automation) -> ClockAutomationForm(selectedScenes, handleCreate)
+                    stringResource(R.string.geolocation_automation) -> GeolocationAutomationForm(getCurrentCoordinates = getCurrentCoordinates, selectedScenes, handleCreate)
+                    stringResource(R.string.shake_automation) -> ShakeAutomationForm(selectedScenes, handleCreate)
                 }
             }
 //            Column(

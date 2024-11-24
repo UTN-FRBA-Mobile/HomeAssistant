@@ -9,8 +9,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,14 +27,14 @@ fun DevicesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Devices") }
+                title = { Text(stringResource(R.string.my_devices)) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 navController.navigate("addDevice")
             }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Device")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_device))
             }
         }
     ) { paddingValues ->
@@ -70,16 +72,16 @@ fun DeviceRow(
                     onDelete()
                     showDialog = false
                 }) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 Button(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
-            title = { Text("Delete Device") },
-            text = { Text("Are you sure you want to delete this device?") }
+            title = { Text(stringResource(R.string.delete_device)) },
+            text = { Text(stringResource(R.string.sure_to_delete_dev)) }
         )
     }
 
@@ -108,7 +110,7 @@ fun DeviceRow(
         IconButton(onClick = {
             showDialog = true  // Show confirmation dialog
         }) {
-            Icon(Icons.Filled.Delete, contentDescription = "Delete Device")
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_device))
         }
     }
 }

@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import ar.edu.utn.frba.homeassistant.R
 
 @Composable
 fun DropdownMenuComponent(
@@ -33,12 +35,12 @@ fun DropdownMenuComponent(
         OutlinedTextField(
             value = selectedOption,
             onValueChange = { },
-            label = { Text("Select Automation Type") },
+            label = { Text(stringResource(R.string.select_auto)) },
             readOnly = true,
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Menu")
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown_menu))
                 }
             }
         )

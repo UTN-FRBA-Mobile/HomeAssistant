@@ -14,8 +14,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.ui.SnackbarManager
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -65,10 +67,10 @@ fun AddDeviceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add New Device") },
+                title = { Text(stringResource(R.string.add_new_device)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -87,12 +89,12 @@ fun AddDeviceScreen(
                     deviceId = value
                     deviceIdValid = value.toLongOrNull() != null
                 },
-                label = { Text("Device Id") },
+                label = { Text(stringResource(R.string.device_id)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = deviceIdValid.not(),
                 supportingText = {
                     if (deviceIdValid.not()) {
-                        Text("Device Id must be a number")
+                        Text(stringResource(R.string.device_id_must_be))
                     }
                 }
             )
@@ -102,7 +104,7 @@ fun AddDeviceScreen(
             OutlinedTextField(
                 value = deviceName,
                 onValueChange = { deviceName = it },
-                label = { Text("Device Name") },
+                label = { Text(stringResource(R.string.device_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -111,7 +113,7 @@ fun AddDeviceScreen(
             OutlinedTextField(
                 value = deviceType,
                 onValueChange = { deviceType = it },
-                label = { Text("Device Type") },
+                label = { Text(stringResource(R.string.device_type)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -126,7 +128,7 @@ fun AddDeviceScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Add Device")
+                Text(stringResource(R.string.add_device))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -139,7 +141,7 @@ fun AddDeviceScreen(
                 onClick = { onScanQrCode() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Scan QR Code")
+                Text(stringResource(R.string.scan_QR))
             }
         }
     }

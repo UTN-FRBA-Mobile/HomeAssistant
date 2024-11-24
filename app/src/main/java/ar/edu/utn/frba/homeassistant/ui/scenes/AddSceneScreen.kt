@@ -14,8 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,10 +33,10 @@ fun AddSceneScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add New Scene") },
+                title = { Text(stringResource(R.string.add_new_scene)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -50,13 +52,13 @@ fun AddSceneScreen(
             OutlinedTextField(
                 value = sceneName,
                 onValueChange = { sceneName = it },
-                label = { Text("Scene Name") },
+                label = { Text(stringResource(R.string.scene_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Select Devices:")
+            Text(stringResource(R.string.select_devices))
             Spacer(modifier = Modifier.height(8.dp))
 
             // List of available devices with buttons to toggle selection
@@ -75,7 +77,7 @@ fun AddSceneScreen(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
-                    Text(text = if (isSelected) "Remove ${device.name}" else "Add ${device.name}")
+                    Text(text = if (isSelected) stringResource(R.string.remove)+" ${device.name}" else stringResource(R.string.add)+" ${device.name}")
                 }
             }
 
@@ -90,7 +92,7 @@ fun AddSceneScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Add Scene")
+                Text(stringResource(R.string.add_scene))
             }
         }
     }

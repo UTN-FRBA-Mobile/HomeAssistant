@@ -9,9 +9,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavHostController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.Device
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +27,8 @@ fun DeviceDetailScreen(
     val device = devices.find { it.deviceId == deviceId }
 
     if (device == null) {
-        Text("Device not found", modifier = Modifier.padding(16.dp))
+        Text(
+            stringResource(R.string.device_not_found), modifier = Modifier.padding(16.dp))
         return
     }
 
@@ -35,10 +38,10 @@ fun DeviceDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Device Details") },
+                title = { Text(stringResource(R.string.device_details)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -52,7 +55,7 @@ fun DeviceDetailScreen(
         ) {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 if (isEditingName) {
-                    Text(text = "Name: ", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = stringResource(R.string.device_name) , style = MaterialTheme.typography.bodyMedium)
                     OutlinedTextField(
                         value = editedName,
                         onValueChange = { editedName = it },
@@ -63,23 +66,23 @@ fun DeviceDetailScreen(
                         isEditingName = false
                         updateDevice(device.copy(name = editedName.text))
                     }) {
-                        Icon(Icons.Filled.Check, contentDescription = "Confirm")
+                        Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.confirm))
                     }
                     IconButton(onClick = {
                         isEditingName = false
                         editedName = TextFieldValue(device.name)
                     }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Cancel")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
                     }
                 } else {
                     Text(text = "Name: ${device.name}", style = MaterialTheme.typography.bodyMedium)
                     IconButton(onClick = { isEditingName = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit))
                     }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Type: ${device.type}", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.type)+": ${device.type}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

@@ -28,8 +28,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 
@@ -47,14 +49,14 @@ fun AutomationsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Automations") }
+                title = { Text(stringResource(R.string.automations_label)) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 navController.navigate("addAutomation")
             }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Automation") // TODO: Use resources
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_automation)) // TODO: Use resources
             }
         }
     ) { paddingValues ->
@@ -92,16 +94,16 @@ fun AutomationRow(
                     onDelete()
                     showDialog = false
                 }) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 Button(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
-            title = { Text("Delete Automation") },
-            text = { Text("Are you sure you want to delete this automation?") }
+            title = { Text(stringResource(R.string.delete)+" "+ stringResource(R.string.automation)) },
+            text = { Text(stringResource(R.string.sure_to_delete_auto)) }
         )
     }
 
@@ -130,7 +132,7 @@ fun AutomationRow(
         IconButton(onClick = {
             showDialog = true  // Show confirmation dialog
         }) {
-            Icon(Icons.Filled.Delete, contentDescription = "Delete Automation")
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete)+" "+ stringResource(R.string.automation))
         }
     }
 }

@@ -22,10 +22,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
@@ -50,7 +52,7 @@ fun GeolocationAutomationForm(
                     Button(onClick = {
                         showAlert = false
                     }) {
-                        Text("do anyway")
+                        Text(stringResource(R.string.do_anyway))
                     }
                 }
             },
@@ -59,8 +61,8 @@ fun GeolocationAutomationForm(
                     Text("Ok")
                 }
             },
-            title = { Text("Action impossible") },
-            text = { Text("You didn't select any scene. You have to select at least one.") }
+            title = { Text(stringResource(R.string.action_impossible)) },
+            text = { Text(stringResource(R.string.you_didnt_select)) }
         )
     }
 
@@ -98,7 +100,7 @@ fun GeolocationAutomationForm(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Use Current Location")
+                Text(text = stringResource(R.string.use_current_loc))
             }
         }
 
@@ -121,7 +123,7 @@ fun GeolocationAutomationForm(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.save))
             }
         }
     }

@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
@@ -34,7 +36,7 @@ fun ShakeAutomationForm(
                     Button(onClick = {
                         showAlert = false
                     }) {
-                        Text("do anyway")
+                        Text(stringResource(R.string.do_anyway))
                     }
                 }
             },
@@ -43,8 +45,8 @@ fun ShakeAutomationForm(
                     Text("Ok")
                 }
             },
-            title = { Text("Action impossible") },
-            text = { Text("You didn't select any scene. You have to select at least one.") }
+            title = { Text(stringResource(R.string.action_impossible)) },
+            text = { Text(stringResource(R.string.you_didnt_select)) }
         )
     }
 
@@ -53,7 +55,7 @@ fun ShakeAutomationForm(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column {
-            Text(text = "Shake Intensity")
+            Text(text = stringResource(R.string.shake_intensity))
             Slider(
                 value = shakeIntensity,
                 onValueChange = { shakeIntensity = it },
@@ -80,7 +82,7 @@ fun ShakeAutomationForm(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.save))
             }
         }
     }
