@@ -101,9 +101,9 @@ class AutomationsViewModel @Inject constructor(
     }
 
     fun addAutomation(automation: IAutomation, scenes: Set<Scene>) {
-        val sceneNames = scenes.map { it.name }.joinToString(",") { it }
-        val automationName = automation::class::simpleName
-        Log.d(TAG, "[addAutomation]: Request to add $automationName. for scenes:  $sceneNames")
+        val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
+        val automationName = automation::class::simpleName.get()
+        Log.d(TAG, "[addAutomation]: Request to add $automationName for scenes:  $sceneNames")
 
         viewModelScope.launch {
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
