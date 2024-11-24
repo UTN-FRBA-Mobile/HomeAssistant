@@ -36,12 +36,22 @@ class AutomationsViewModel @Inject constructor(
     val shakeAutomations = repository.getShakeAutomationsWithScenes()
     val scenes = repository.getScenes()
 
-    fun deleteAutomation(automation: IAutomation) {
+    fun deleteAutomation(automationWithScenes: IAutomationWithScenes) {
         viewModelScope.launch {
+            val automation = automationWithScenes.automation
+            val automationId = automation.automationId!!
+            val scenes = automationWithScenes.scenes
+            val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
+
             repository.deleteAutomation(automation)
             when (automation) {
+                is ClockAutomation -> unregisterClockAutomation(
+                    devicesIds,
+                    automationId,
+                    automation
+                )
                 is ShakeAutomation -> unregisterShakeAutomation()
-                // TODO: Add other automations unregister
+                is GeolocationAutomation -> unregisterGeolocationAutomation(devicesIds, automation)
             }
         }
     }

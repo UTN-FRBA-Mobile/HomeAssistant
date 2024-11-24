@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +37,7 @@ import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 fun AutomationsScreen(
     navController: NavController,
     automations: List<IAutomationWithScenes>,
-    onDelete: (IAutomation) -> Unit,
+    onDelete: (IAutomationWithScenes) -> Unit,
     onToggle: (IAutomationWithScenes, Boolean) -> Unit
 ) {
 
@@ -67,7 +66,7 @@ fun AutomationsScreen(
             items(automations.size) { index ->
                 val automation = automations[index]
                 AutomationRow(automation, navController, onDelete = {
-                    onDelete(automation.automation)
+                    onDelete(automation)
                 }, onToggle = { onToggle(automation, it)  })
                 HorizontalDivider()
             }
