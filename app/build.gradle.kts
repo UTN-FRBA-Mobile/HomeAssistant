@@ -90,4 +90,7 @@ dependencies {
 
     // Barcode scanner
     implementation(libs.play.services.code.scanner)
+
+    // Reflection
+    implementation(libs.kotlin.reflect)
 }

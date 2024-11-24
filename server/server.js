@@ -12,6 +12,8 @@ const devices = [
   { id: 111111, name: 'Kitchen Air Conditioner', type: 'Air Conditioner', state: false, image: 'air-conditioner.png' },
   { id: 222222, name: 'Kitchen Light', type: 'Light', state: false, image: 'light-bulb.png' },
   { id: 333333, name: 'Bedroom Television', type: 'TV', state: false, image: 'television.png' },
+  { id: 444444, name: 'Bedroom Air Conditioner', type: 'Air Conditioner', state: false, image: 'air-conditioner.png' },
+  { id: 555555, name: 'Bedroom Light', type: 'Light', state: false, image: 'light-bulb.png' },
 ];
 
 const PORT = 54321;

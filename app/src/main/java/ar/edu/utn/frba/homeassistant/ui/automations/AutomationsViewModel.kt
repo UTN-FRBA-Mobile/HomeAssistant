@@ -36,12 +36,22 @@ class AutomationsViewModel @Inject constructor(
     val shakeAutomations = repository.getShakeAutomationsWithScenes()
     val scenes = repository.getScenes()
 
-    fun deleteAutomation(automation: IAutomation) {
+    fun deleteAutomation(automationWithScenes: IAutomationWithScenes) {
         viewModelScope.launch {
+            val automation = automationWithScenes.automation
+            val automationId = automation.automationId!!
+            val scenes = automationWithScenes.scenes
+            val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
+
             repository.deleteAutomation(automation)
             when (automation) {
+                is ClockAutomation -> unregisterClockAutomation(
+                    devicesIds,
+                    automationId,
+                    automation
+                )
                 is ShakeAutomation -> unregisterShakeAutomation()
-                // TODO: Add other automations unregister
+                is GeolocationAutomation -> unregisterGeolocationAutomation(devicesIds, automation)
             }
         }
     }
@@ -65,7 +75,7 @@ class AutomationsViewModel @Inject constructor(
 
                 is GeolocationAutomation -> {
                     if (enable) {
-                        registerGeolocationAutomation(devicesIds, automation)
+                        registerGeolocationAutomation(devicesIds, automation, automationId)
                     } else {
                         unregisterGeolocationAutomation(devicesIds, automation)
                     }
@@ -91,9 +101,9 @@ class AutomationsViewModel @Inject constructor(
     }
 
     fun addAutomation(automation: IAutomation, scenes: Set<Scene>) {
-        val sceneNames = scenes.map { it.name }.joinToString(",") { it }
-        val automationName = automation::class::simpleName
-        Log.d(TAG, "[addAutomation]: Request to add $automationName. for scenes:  $sceneNames")
+        val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
+        val automationName = automation::class::simpleName.get()
+        Log.d(TAG, "[addAutomation]: Request to add $automationName for scenes:  $sceneNames")
 
         viewModelScope.launch {
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
@@ -153,18 +163,19 @@ class AutomationsViewModel @Inject constructor(
         Log.d(TAG, "[addGeolocationAutomation]: Request to save automation in database")
         val id = repository.addAutomation(automation, scenes.toList())
         Log.d(TAG, "[addGeolocationAutomation]: Automation successfully saved with id $id")
-        registerGeolocationAutomation(devicesIds, automation)
-
+        registerGeolocationAutomation(devicesIds, automation, id)
     }
 
     private fun registerGeolocationAutomation(
         devicesIds: List<Long>,
-        automation: GeolocationAutomation
+        automation: GeolocationAutomation,
+        automationId: Long
     ) {
         registerGeofenceReceiver(
             application.applicationContext,
             devicesIds.toLongArray(),
-            automation
+            automation,
+            automationId
         )
     }
 

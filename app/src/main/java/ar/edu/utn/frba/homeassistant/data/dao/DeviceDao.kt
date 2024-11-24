@@ -25,6 +25,9 @@ interface DeviceDao {
     @Update
     suspend fun update(device: Device)
 
+    @Query("Update device SET isOn = :isOn WHERE deviceId = :id")
+    suspend fun updateIsOn(id: Long, isOn: Boolean)
+
     @Delete
     suspend fun delete(device: Device)
 }

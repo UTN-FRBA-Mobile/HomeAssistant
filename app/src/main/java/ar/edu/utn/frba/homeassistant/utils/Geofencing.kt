@@ -46,7 +46,7 @@ fun buildGeofenceRequest(geofence: Geofence): GeofencingRequest {
 }
 
 const val GEOFENCE_TAG = "$GLOBAL_TAG#GEOFENCING"
-fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation: GeolocationAutomation){
+fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation: GeolocationAutomation, automationId: Long){
     if (deviceIds.isEmpty()) {
         Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: No device ids found")
         return
@@ -56,21 +56,20 @@ fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation:
     val latitude = automation.latitude
     val longitude = automation.longitude
     val radius = /*automation.radius*/ 100f
-    val id = automation.automationId
 
     if (latitude == 0.0 || longitude == 0.0) {
-        Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Invalid parameters found. Can't register geolocation automation. Received latitude: $latitude, longitude: $longitude, id: $id")
+        Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Invalid parameters found. Can't register geolocation automation. Received latitude: $latitude, longitude: $longitude, id: $automationId")
         return
     }
 
-    Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Registering Geofence $id at $latitude, $longitude with radius $radius meters")
+    Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Registering Geofence $automationId at $latitude, $longitude with radius $radius meters")
 
     // https://medium.com/@KaushalVasava/geofence-in-android-8add1f6b9be1
     val geofencingClient = LocationServices.getGeofencingClient(context)
     val geofence = buildGeofence("$latitude,$longitude", latitude, longitude, radius)
     val geofenceRequest = buildGeofenceRequest(geofence)
     val geofenceBroadcastIntent = Intent(context, GeofenceBroadcastReceiver::class.java)
-    geofenceBroadcastIntent.putExtra("automationId", id)
+    geofenceBroadcastIntent.putExtra("automationId", automationId)
     geofenceBroadcastIntent.putExtra(DEVICE_IDS, deviceIds)
     val pendingIntent = PendingIntent.getBroadcast(
         context,

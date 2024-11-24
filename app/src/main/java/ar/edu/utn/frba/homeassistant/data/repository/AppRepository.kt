@@ -31,6 +31,8 @@ class AppRepository @Inject constructor(
 
     suspend fun updateDevice(device: Device) = deviceDao.update(device)
 
+    suspend fun updateIsOn(id: Long, isOn: Boolean) = deviceDao.updateIsOn(id, isOn)
+
     suspend fun deleteDevice(device: Device) = deviceDao.delete(device)
 
     fun getScenesWithDevices() = sceneDao.getAllWithDevices()
