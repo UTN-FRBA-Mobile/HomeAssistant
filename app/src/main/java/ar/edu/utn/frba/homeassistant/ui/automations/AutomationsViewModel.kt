@@ -75,7 +75,7 @@ class AutomationsViewModel @Inject constructor(
 
                 is GeolocationAutomation -> {
                     if (enable) {
-                        registerGeolocationAutomation(devicesIds, automation)
+                        registerGeolocationAutomation(devicesIds, automation, automationId)
                     } else {
                         unregisterGeolocationAutomation(devicesIds, automation)
                     }
@@ -163,18 +163,19 @@ class AutomationsViewModel @Inject constructor(
         Log.d(TAG, "[addGeolocationAutomation]: Request to save automation in database")
         val id = repository.addAutomation(automation, scenes.toList())
         Log.d(TAG, "[addGeolocationAutomation]: Automation successfully saved with id $id")
-        registerGeolocationAutomation(devicesIds, automation)
-
+        registerGeolocationAutomation(devicesIds, automation, id)
     }
 
     private fun registerGeolocationAutomation(
         devicesIds: List<Long>,
-        automation: GeolocationAutomation
+        automation: GeolocationAutomation,
+        automationId: Long
     ) {
         registerGeofenceReceiver(
             application.applicationContext,
             devicesIds.toLongArray(),
-            automation
+            automation,
+            automationId
         )
     }
 
