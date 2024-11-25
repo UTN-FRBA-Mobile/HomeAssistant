@@ -32,18 +32,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.CLOCK_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import java.util.Calendar
 
 @Composable
 fun ClockAutomationForm(
     selectedScenes: Set<Scene>,
-    onCreate: (IAutomation) -> Unit,
+    onCreate: (Automation) -> Unit,
     automationId: Long,
-    automationWithScenes: ClockAutomationWithScenes?
+    automationWithScenes: AutomationWithScenes?
 ) {
     val automation = automationWithScenes?.automation
 
@@ -115,7 +115,10 @@ fun ClockAutomationForm(
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     IconButton(onClick = { showTimePicker { time = it } }) {
-                        Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_start))
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = stringResource(R.string.select_start)
+                        )
                     }
                 }
             )
@@ -180,7 +183,7 @@ fun ClockAutomationForm(
                             .map { it.key.slice(IntRange(0, 1)) }.joinToString(
                                 ", "
                             )
-                        val newAutomation = ClockAutomation(
+                        val newAutomation = Automation(
                             automationId = automationId,
                             time = time,
                             isOn = false,
@@ -193,9 +196,10 @@ fun ClockAutomationForm(
                             thursday = selectedDays["Thursday"] ?: false,
                             friday = selectedDays["Friday"] ?: false,
                             saturday = selectedDays["Saturday"] ?: false,
-                            sunday = selectedDays["Sunday"] ?: false
+                            sunday = selectedDays["Sunday"] ?: false,
+                            type = CLOCK_AUTOMATION
                         )
-                        onCreate(newAutomation as IAutomation)
+                        onCreate(newAutomation)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

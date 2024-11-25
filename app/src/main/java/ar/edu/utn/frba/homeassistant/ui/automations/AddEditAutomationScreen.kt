@@ -26,14 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
-import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.CLOCK_AUTOMATION
+import ar.edu.utn.frba.homeassistant.data.model.GEOLOCATION_AUTOMATION
+import ar.edu.utn.frba.homeassistant.data.model.SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.Scene
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.ClockAutomationForm
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.GeolocationAutomationForm
 import ar.edu.utn.frba.homeassistant.ui.automations.forms.ShakeAutomationForm
@@ -43,12 +41,12 @@ import ar.edu.utn.frba.homeassistant.ui.automations.forms.components.MultiSelect
 @Composable
 fun AddEditAutomationScreen(
     navController: NavHostController,
-    onCreate: (IAutomation, Set<Scene>) -> Unit,
+    onCreate: (Automation, Set<Scene>) -> Unit,
     scenes: List<Scene>,
     getCurrentCoordinates: GetCurrentCoordinates,
     automationId: Long = 0,
-    onUpdate: (IAutomation, Set<Scene>, IAutomation, Set<Scene>) -> Unit = { _, _, _, _ -> },
-    automations: List<IAutomationWithScenes> = emptyList(),
+    onUpdate: (Automation, Set<Scene>, Automation, Set<Scene>) -> Unit = { _, _, _, _ -> },
+    automations: List<AutomationWithScenes> = emptyList(),
 ) {
     AutomationForm(
         goBack = { navController.popBackStack() },
@@ -61,41 +59,41 @@ fun AddEditAutomationScreen(
     )
 }
 
-private const val CLOCK_AUTOMATION = "Clock Automation"
+private const val CLOCK_AUTOMATION_LABEL = "Clock Automation"
 
-private const val GEOLOCATION_AUTOMATION = "Geolocation Automation"
+private const val GEOLOCATION_AUTOMATION_LABEL = "Geolocation Automation"
 
-private const val SHAKE_AUTOMATION = "Shake Automation"
+private const val SHAKE_AUTOMATION_LABEL = "Shake Automation"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationForm(
     goBack: () -> Unit,
     scenes: List<Scene>,
-    onCreate: (IAutomation, Set<Scene>) -> Unit,
+    onCreate: (Automation, Set<Scene>) -> Unit,
     getCurrentCoordinates: GetCurrentCoordinates,
     automationId: Long = 0,
-    onUpdate: (IAutomation, Set<Scene>, IAutomation, Set<Scene>) -> Unit = { _, _, _, _ -> },
-    automations: List<IAutomationWithScenes>,
+    onUpdate: (Automation, Set<Scene>, Automation, Set<Scene>) -> Unit = { _, _, _, _ -> },
+    automationsWithScenes: List<AutomationWithScenes>,
 ) {
-    val automation = automations.find { it.automation.automationId == automationId }
-    val isEditMode = automation != null
+    val automationWithScenes = automationsWithScenes.find { it.automation.automationId == automationId }
+    val isEditMode = automationWithScenes != null
 
-    val initialSelectedAutomation = when (automation?.automation) {
-        is ClockAutomation -> CLOCK_AUTOMATION
-        is GeolocationAutomation -> GEOLOCATION_AUTOMATION
-        is ShakeAutomation -> SHAKE_AUTOMATION
-        else -> CLOCK_AUTOMATION
+    val initialSelectedAutomation = when (automationWithScenes?.automation?.type) {
+        CLOCK_AUTOMATION -> CLOCK_AUTOMATION_LABEL
+        GEOLOCATION_AUTOMATION -> GEOLOCATION_AUTOMATION_LABEL
+        SHAKE_AUTOMATION -> SHAKE_AUTOMATION_LABEL
+        else -> CLOCK_AUTOMATION_LABEL
     }
 
-    val initialSelectedScenes = automation?.scenes?.toSet() ?: setOf()
+    val initialSelectedScenes = automationWithScenes?.scenes?.toSet() ?: setOf()
 
     var selectedAutomation by remember { mutableStateOf(initialSelectedAutomation) }
     var selectedScenes by remember { mutableStateOf(initialSelectedScenes) }
 
-    val handleUpsert: (IAutomation) -> Unit = {
+    val handleUpsert: (Automation) -> Unit = {
         if (isEditMode) {
-            onUpdate(automation!!.automation, automation.scenes.toSet(), it, selectedScenes)
+            onUpdate(automationWithScenes!!.automation, automationWithScenes.scenes.toSet(), it, selectedScenes)
         } else {
             onCreate(it, selectedScenes)
         }
@@ -127,9 +125,9 @@ fun AutomationForm(
                 DropdownMenuComponent(
                     selectedOption = selectedAutomation,
                     options = listOf(
-                        CLOCK_AUTOMATION,
-                        GEOLOCATION_AUTOMATION,
-                        SHAKE_AUTOMATION
+                        CLOCK_AUTOMATION_LABEL,
+                        GEOLOCATION_AUTOMATION_LABEL,
+                        SHAKE_AUTOMATION_LABEL
                     ),
                     onOptionSelected = { selectedAutomation = it },
                     modifier = Modifier.fillMaxWidth(),
@@ -150,22 +148,22 @@ fun AutomationForm(
 
                 // Display fields based on selected automation
                 when (selectedAutomation) {
-                    CLOCK_AUTOMATION -> ClockAutomationForm(
+                    CLOCK_AUTOMATION_LABEL -> ClockAutomationForm(
                         selectedScenes,
                         handleUpsert,
                         automationId,
-                        automation as ClockAutomationWithScenes?
+                        automationWithScenes
                     )
 
-                    GEOLOCATION_AUTOMATION -> GeolocationAutomationForm(
+                    GEOLOCATION_AUTOMATION_LABEL -> GeolocationAutomationForm(
                         getCurrentCoordinates = getCurrentCoordinates,
                         selectedScenes,
                         handleUpsert,
                         automationId,
-                        automation as GeolocationAutomationWithScenes?
+                        automationWithScenes
                     )
 
-                    SHAKE_AUTOMATION -> ShakeAutomationForm(
+                    SHAKE_AUTOMATION_LABEL -> ShakeAutomationForm(
                         selectedScenes,
                         handleUpsert,
                         automationId
@@ -194,8 +192,8 @@ fun AddAutomationScreenPreview() {
     AutomationForm(
         goBack = {},
         scenes = emptyList(),
-        onCreate = { _: IAutomation, _: Set<Scene> -> },
+        onCreate = { _: Automation, _: Set<Scene> -> },
         getCurrentCoordinates = { },
-        automations = emptyList()
+        automationsWithScenes = emptyList()
     )
 }

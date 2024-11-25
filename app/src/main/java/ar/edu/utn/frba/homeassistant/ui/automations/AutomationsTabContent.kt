@@ -15,9 +15,7 @@ fun AutomationsTabContent(
     getCurrentCoordinates: GetCurrentCoordinates
 ) {
     val navController = rememberNavController()
-    val clockAutomations by viewModel.clockAutomations.observeAsState(emptyList())
-    val geolocationAutomations by viewModel.geolocationAutomations.observeAsState(emptyList())
-    val shakeAutomations by viewModel.shakeAutomations.observeAsState(emptyList())
+    val automationsWithScenes by viewModel.automationsWithScenes.observeAsState(emptyList())
     val scenes by viewModel.scenes.observeAsState(emptyList())
 
     NavHost(navController, startDestination = "automationsList") {
@@ -31,7 +29,6 @@ fun AutomationsTabContent(
         }
         composable("editAutomation/{automationId}") { backStackEntry ->
             val automationId = backStackEntry.arguments?.getString("automationId")?.toLong() ?: 0
-            val automationsWithScenes = clockAutomations + geolocationAutomations + shakeAutomations
             AddEditAutomationScreen(
                 navController,
                 viewModel::addAutomation,
@@ -43,7 +40,6 @@ fun AutomationsTabContent(
             )
         }
         composable("automationsList") {
-            val automationsWithScenes = clockAutomations + geolocationAutomations + shakeAutomations
             AutomationsScreen(
                 navController,
                 automationsWithScenes,

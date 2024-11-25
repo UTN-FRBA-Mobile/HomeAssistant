@@ -15,14 +15,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.Scene
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 
 @Composable
 fun ShakeAutomationForm(
     selectedScenes: Set<Scene>,
-    onCreate: (IAutomation) -> Unit,
+    onCreate: (Automation) -> Unit,
     automationId: Long,
 ) {
 //    var shakeIntensity by remember { mutableStateOf(0f) }
@@ -73,9 +73,10 @@ fun ShakeAutomationForm(
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
                     } else {
-                        val automation = ShakeAutomation(
+                        val automation = Automation(
                             automationId = automationId,
                             name = "Shake Automation",
+                            type = SHAKE_AUTOMATION,
                         )
                         onCreate(automation)
                     }

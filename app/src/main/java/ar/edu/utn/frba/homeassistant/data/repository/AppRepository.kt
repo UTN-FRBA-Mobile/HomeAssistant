@@ -3,16 +3,11 @@ package ar.edu.utn.frba.homeassistant.data.repository
 import ar.edu.utn.frba.homeassistant.data.dao.AutomationDao
 import ar.edu.utn.frba.homeassistant.data.dao.DeviceDao
 import ar.edu.utn.frba.homeassistant.data.dao.SceneDao
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef
 import ar.edu.utn.frba.homeassistant.data.model.Device
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import ar.edu.utn.frba.homeassistant.data.model.SceneDeviceCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
 import javax.inject.Inject
 
 class AppRepository @Inject constructor(
@@ -71,20 +66,18 @@ class AppRepository @Inject constructor(
         }
     }
 
-    fun getClockAutomationsWithScenes() = automationDao.getAllClockWithScenes()
-    fun getGeolocationAutomationsWithScenes() = automationDao.getAllGeolocationWithScenes()
-    fun getShakeAutomationsWithScenes() = automationDao.getAllShakeWithScenes()
+    fun getAutomationsWithScenes() = automationDao.getAllWithScenes()
 
-    suspend fun addAutomation(automation: ClockAutomation, scenes: List<Scene>): Long {
+    suspend fun addAutomation(automation: Automation, scenes: List<Scene>): Long {
         val id = automationDao.insert(automation)
-        addClockAutomationScenes(scenes, id)
+        addAutomationScenes(scenes, id)
         return id
     }
 
-    private suspend fun addClockAutomationScenes(scenes: List<Scene>, automationId: Long) {
+    private suspend fun addAutomationScenes(scenes: List<Scene>, automationId: Long) {
         scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
-                ClockAutomationSceneCrossRef(
+                AutomationSceneCrossRef(
                     it.sceneId,
                     automationId
                 )
@@ -92,80 +85,17 @@ class AppRepository @Inject constructor(
         }
     }
 
-    suspend fun addAutomation(automation: GeolocationAutomation, scenes: List<Scene>): Long {
-        val id = automationDao.insert(automation)
-        addGeoAutomationScenes(scenes, id)
-        return id
-    }
-
-    private suspend fun addGeoAutomationScenes(scenes: List<Scene>, id: Long) {
-        scenes.forEach {
-            automationDao.insertAutomationSceneCrossRef(
-                GeolocationAutomationSceneCrossRef(
-                    it.sceneId,
-                    id
-                )
-            )
-        }
-    }
-
-    suspend fun addAutomation(automation: ShakeAutomation, scenes: List<Scene>): Long {
-        val id = automationDao.insert(automation)
-        addShakeAutomationScenes(scenes, id)
-        return id
-    }
-
-    private suspend fun addShakeAutomationScenes(scenes: List<Scene>, id: Long) {
-        scenes.forEach {
-            automationDao.insertAutomationSceneCrossRef(
-                ShakeAutomationSceneCrossRef(
-                    it.sceneId,
-                    id
-                )
-            )
-        }
-    }
-
-    suspend fun updateAutomation(automation: IAutomation) {
-        when (automation) {
-            is ClockAutomation -> automationDao.update(automation)
-            is GeolocationAutomation -> automationDao.update(automation)
-            is ShakeAutomation -> automationDao.update(automation)
-        }
-    }
-
-    suspend fun updateAutomation(automation: IAutomation, scenes: List<Scene>) {
-        when (automation) {
-            is ClockAutomation -> updateClockAutomation(automation, scenes)
-            is GeolocationAutomation -> updateGeoAutomation(automation, scenes)
-            is ShakeAutomation -> updateShakeAutomation(automation, scenes)
-        }
-    }
-
-    private suspend fun updateClockAutomation(automation: ClockAutomation, scenes: List<Scene>) {
+    suspend fun updateAutomation(automation: Automation) {
         automationDao.update(automation)
-        automationDao.deleteClockAutomationScenes(automation.automationId)
-        addClockAutomationScenes(scenes, automation.automationId)
     }
 
-    private suspend fun updateGeoAutomation(automation: GeolocationAutomation, scenes: List<Scene>) {
+    suspend fun updateAutomation(automation: Automation, scenes: List<Scene>) {
+        automationDao.deleteAutomationScenes(automation.automationId)
+        addAutomationScenes(scenes, automation.automationId)
         automationDao.update(automation)
-        automationDao.deleteGeoAutomationScenes(automation.automationId)
-        addGeoAutomationScenes(scenes, automation.automationId)
     }
 
-    private suspend fun updateShakeAutomation(automation: ShakeAutomation, scenes: List<Scene>) {
-        automationDao.update(automation)
-        automationDao.deleteShakeAutomationScenes(automation.automationId)
-        addShakeAutomationScenes(scenes, automation.automationId)
-    }
-
-    suspend fun deleteAutomation(automation: IAutomation) {
-        println(automation)
-        when (automation) {
-            is ClockAutomation -> automationDao.delete(automation)
-            is GeolocationAutomation -> automationDao.delete(automation)
-            is ShakeAutomation -> automationDao.delete(automation)
-        }
+    suspend fun deleteAutomation(automation: Automation) {
+        automationDao.delete(automation)
     }
 }

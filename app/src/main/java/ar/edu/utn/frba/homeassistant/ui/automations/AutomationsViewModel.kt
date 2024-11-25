@@ -6,12 +6,16 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.utn.frba.homeassistant.GLOBAL_TAG
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.CLOCK_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GEOLOCATION_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
-import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.SHAKE_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.Scene
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
+import ar.edu.utn.frba.homeassistant.data.model.toClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.toGeolocationAutomation
 import ar.edu.utn.frba.homeassistant.data.repository.AppRepository
 import ar.edu.utn.frba.homeassistant.service.DEVICE_IDS
 import ar.edu.utn.frba.homeassistant.service.REGISTER_SHAKE_AUTOMATION
@@ -31,12 +35,10 @@ class AutomationsViewModel @Inject constructor(
     private val repository: AppRepository,
     private val application: Application
 ) : ViewModel() {
-    val clockAutomations = repository.getClockAutomationsWithScenes()
-    val geolocationAutomations = repository.getGeolocationAutomationsWithScenes()
-    val shakeAutomations = repository.getShakeAutomationsWithScenes()
+    val automationsWithScenes = repository.getAutomationsWithScenes()
     val scenes = repository.getScenes()
 
-    fun deleteAutomation(automationWithScenes: IAutomationWithScenes) {
+    fun deleteAutomation(automationWithScenes: AutomationWithScenes) {
         viewModelScope.launch {
             val automation = automationWithScenes.automation
             val automationId = automation.automationId
@@ -44,45 +46,49 @@ class AutomationsViewModel @Inject constructor(
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
 
             repository.deleteAutomation(automation)
-            when (automation) {
-                is ClockAutomation -> unregisterClockAutomation(
+            when (automation.type) {
+                CLOCK_AUTOMATION -> unregisterClockAutomation(
                     devicesIds,
                     automationId,
-                    automation
+                    automation.toClockAutomation()
                 )
-                is ShakeAutomation -> unregisterShakeAutomation()
-                is GeolocationAutomation -> unregisterGeolocationAutomation(devicesIds, automation)
+
+                SHAKE_AUTOMATION -> unregisterShakeAutomation()
+                GEOLOCATION_AUTOMATION -> unregisterGeolocationAutomation(
+                    devicesIds,
+                    automation.toGeolocationAutomation()
+                )
             }
         }
     }
 
-    fun toggleAutomation(automationWithScenes: IAutomationWithScenes, enable: Boolean) {
+    fun toggleAutomation(automationWithScenes: AutomationWithScenes, enable: Boolean) {
         viewModelScope.launch {
             val automation = automationWithScenes.automation
             val automationId = automation.automationId
             val scenes = automationWithScenes.scenes
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
 
-            when (automation) {
-                is ClockAutomation -> {
+            when (automation.type) {
+                CLOCK_AUTOMATION -> {
                     if (enable) {
-                        registerClockAutomation(devicesIds, automationId, automation)
+                        registerClockAutomation(devicesIds, automationId, automation.toClockAutomation())
                     } else {
-                        unregisterClockAutomation(devicesIds, automationId, automation)
+                        unregisterClockAutomation(devicesIds, automationId, automation.toClockAutomation())
                     }
                     repository.updateAutomation(automation.copy(enabled = enable))
                 }
 
-                is GeolocationAutomation -> {
+                GEOLOCATION_AUTOMATION -> {
                     if (enable) {
-                        registerGeolocationAutomation(devicesIds, automation, automationId)
+                        registerGeolocationAutomation(devicesIds, automation.toGeolocationAutomation(), automationId)
                     } else {
-                        unregisterGeolocationAutomation(devicesIds, automation)
+                        unregisterGeolocationAutomation(devicesIds, automation.toGeolocationAutomation())
                     }
                     repository.updateAutomation(automation.copy(enabled = enable))
                 }
 
-                is ShakeAutomation -> {
+                SHAKE_AUTOMATION -> {
                     if (enable) {
                         registerShakeAutomation(devicesIds)
                     } else {
@@ -100,23 +106,31 @@ class AutomationsViewModel @Inject constructor(
         }
     }
 
-    fun addAutomation(automation: IAutomation, scenes: Set<Scene>) {
+    fun addAutomation(automation: Automation, scenes: Set<Scene>) {
         val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
         val automationName = automation::class::simpleName.get()
         Log.d(TAG, "[addAutomation]: Request to add $automationName for scenes:  $sceneNames")
 
         viewModelScope.launch {
+            Log.d(TAG, "[addClockAutomation]: Request to save automation in database")
+            val id = repository.addAutomation(automation, scenes.toList())
+            Log.d(TAG, "[addClockAutomation]: Automation successfully saved with id $id")
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
-            when (automation) {
-                is ClockAutomation -> addClockAutomation(automation, scenes, devicesIds)
-                is GeolocationAutomation -> addGeolocationAutomation(automation, scenes, devicesIds)
-                is ShakeAutomation -> addShakeAutomation(automation, scenes, devicesIds)
+            when (automation.type) {
+                CLOCK_AUTOMATION -> registerClockAutomation(devicesIds, id, automation.toClockAutomation())
+                GEOLOCATION_AUTOMATION -> registerGeolocationAutomation(devicesIds, automation.toGeolocationAutomation(), id)
+                SHAKE_AUTOMATION -> registerShakeAutomation(devicesIds)
                 else -> Log.wtf(TAG, "[addAutomation]: Unknown automation type")
             }
         }
     }
 
-    fun updateAutomation(originalAutomation: IAutomation, originalScenes: Set<Scene>, automation: IAutomation, scenes: Set<Scene>) {
+    fun updateAutomation(
+        originalAutomation: Automation,
+        originalScenes: Set<Scene>,
+        automation: Automation,
+        scenes: Set<Scene>
+    ) {
         val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
         val automationName = automation::class::simpleName.get()
         Log.d(TAG, "[addAutomation]: Request to update $automationName for scenes:  $sceneNames")
@@ -124,36 +138,35 @@ class AutomationsViewModel @Inject constructor(
         viewModelScope.launch {
             val automationId = automation.automationId
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
-            val originalDevicesIds = repository.getScenesDevicesIds(originalScenes.toList().map { it.sceneId })
+            val originalDevicesIds =
+                repository.getScenesDevicesIds(originalScenes.toList().map { it.sceneId })
             repository.updateAutomation(automation, scenes.toList())
-            when (automation) {
-                is ClockAutomation -> {
-                    unregisterClockAutomation(originalDevicesIds, automationId, originalAutomation as ClockAutomation)
-                    registerClockAutomation(devicesIds, automationId, automation)
+            when (automation.type) {
+                CLOCK_AUTOMATION -> {
+                    unregisterClockAutomation(
+                        originalDevicesIds,
+                        automationId,
+                        originalAutomation.toClockAutomation()
+                    )
+                    registerClockAutomation(devicesIds, automationId, automation.toClockAutomation())
                 }
-                is GeolocationAutomation -> {
-                    unregisterGeolocationAutomation(originalDevicesIds, originalAutomation as GeolocationAutomation)
-                    registerGeolocationAutomation(devicesIds, automation, automationId)
+
+                GEOLOCATION_AUTOMATION -> {
+                    unregisterGeolocationAutomation(
+                        originalDevicesIds,
+                        originalAutomation.toGeolocationAutomation()
+                    )
+                    registerGeolocationAutomation(devicesIds, automation.toGeolocationAutomation(), automationId)
                 }
-                is ShakeAutomation -> {
+
+                SHAKE_AUTOMATION -> {
                     unregisterShakeAutomation()
                     registerShakeAutomation(devicesIds)
                 }
+
                 else -> Log.wtf(TAG, "[addAutomation]: Unknown automation type")
             }
         }
-    }
-
-    private suspend fun addClockAutomation(
-        automation: ClockAutomation,
-        scenes: Set<Scene>,
-        devicesIds: List<Long>
-    ) {
-        Log.d(TAG, "[addClockAutomation]: Request to save automation in database")
-        val id = repository.addAutomation(automation, scenes.toList())
-        Log.d(TAG, "[addClockAutomation]: Automation successfully saved with id $id")
-        Log.d(TAG, "[addAutomation#clockAutomation]: Setting alarm for automation")
-        registerClockAutomation(devicesIds, id, automation)
     }
 
     private fun registerClockAutomation(
@@ -182,18 +195,6 @@ class AutomationsViewModel @Inject constructor(
         )
     }
 
-
-    private suspend fun addGeolocationAutomation(
-        automation: GeolocationAutomation,
-        scenes: Set<Scene>,
-        devicesIds: List<Long>
-    ) {
-        Log.d(TAG, "[addGeolocationAutomation]: Request to save automation in database")
-        val id = repository.addAutomation(automation, scenes.toList())
-        Log.d(TAG, "[addGeolocationAutomation]: Automation successfully saved with id $id")
-        registerGeolocationAutomation(devicesIds, automation, id)
-    }
-
     private fun registerGeolocationAutomation(
         devicesIds: List<Long>,
         automation: GeolocationAutomation,
@@ -216,17 +217,6 @@ class AutomationsViewModel @Inject constructor(
             devicesIds.toLongArray(),
             automation
         )
-    }
-
-    private suspend fun addShakeAutomation(
-        automation: ShakeAutomation,
-        scenes: Set<Scene>,
-        devicesIds: List<Long>
-    ) {
-        Log.d(TAG, "[addShakeAutomation]: Request to save automation in database")
-        val id = repository.addAutomation(automation, scenes.toList())
-        Log.d(TAG, "[addShakeAutomation]: Automation successfully saved with id $id")
-        registerShakeAutomation(devicesIds)
     }
 
     private fun registerShakeAutomation(devicesIds: List<Long>) {

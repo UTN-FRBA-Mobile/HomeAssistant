@@ -7,84 +7,31 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
-import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationSceneCrossRef
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
 
 @Dao
 interface AutomationDao {
-    @Query("SELECT * FROM clockautomation")
-    fun getAll(): LiveData<List<ClockAutomation>>
+    @Query("SELECT * FROM Automation")
+    fun getAll(): LiveData<List<Automation>>
 
     @Transaction
-    @Query("SELECT * FROM clockautomation")
-    fun getAllClockWithScenes(): LiveData<List<ClockAutomationWithScenes>>
-
-    @Transaction
-    @Query("SELECT * FROM geolocationautomation")
-    fun getAllGeolocationWithScenes(): LiveData<List<GeolocationAutomationWithScenes>>
-
-    @Transaction
-    @Query("SELECT * FROM shakeautomation")
-    fun getAllShakeWithScenes(): LiveData<List<ShakeAutomationWithScenes>>
+    @Query("SELECT * FROM Automation")
+    fun getAllWithScenes(): LiveData<List<AutomationWithScenes>>
 
     @Insert
-    suspend fun insert(automation: ClockAutomation): Long
+    suspend fun insert(automation: Automation): Long
 
     @Insert
-    suspend fun insert(automation: GeolocationAutomation): Long
+    suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: AutomationSceneCrossRef)
 
-    @Insert
-    suspend fun insert(automation: ShakeAutomation): Long
-
-    @Insert
-    suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: ClockAutomationSceneCrossRef)
-
-    @Insert
-    suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: ShakeAutomationSceneCrossRef)
-
-    @Insert
-    suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: GeolocationAutomationSceneCrossRef)
-
-    @Query("DELETE FROM clockAutomationSceneCrossRef WHERE automationId = :automationId")
-    suspend fun deleteClockAutomationScenes(automationId: Long)
-
-    @Query("DELETE FROM geolocationAutomationSceneCrossRef WHERE automationId = :automationId")
-    suspend fun deleteGeoAutomationScenes(automationId: Long)
-
-    @Query("DELETE FROM shakeAutomationSceneCrossRef WHERE automationId = :automationId")
-    suspend fun deleteShakeAutomationScenes(automationId: Long)
+    @Query("DELETE FROM AutomationSceneCrossRef WHERE automationId = :automationId")
+    suspend fun deleteAutomationScenes(automationId: Long)
 
     @Update
-    suspend fun update(automation: ClockAutomation)
-
-    @Update
-    suspend fun update(automation: GeolocationAutomation)
-
-    @Update
-    suspend fun update(automation: ShakeAutomation)
+    suspend fun update(automation: Automation)
 
     @Delete
-    suspend fun delete(automation: ClockAutomation)
-
-    @Delete
-    suspend fun delete(automation: GeolocationAutomation)
-
-    @Delete
-    suspend fun delete(automation: ShakeAutomation)
-//
-//    @Update
-//    suspend fun update(scene: Scene)
-//
-//    @Delete
-//    suspend fun delete(scene: Scene)
-//
-//    @Query("DELETE FROM sceneDeviceCrossRef WHERE sceneId = :sceneId")
-//    suspend fun deleteSceneDevices(sceneId: Long)
+    suspend fun delete(automation: Automation)
 }

@@ -32,15 +32,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationsScreen(
     navController: NavController,
-    automations: List<IAutomationWithScenes>,
-    onDelete: (IAutomationWithScenes) -> Unit,
-    onToggle: (IAutomationWithScenes, Boolean) -> Unit
+    automations: List<AutomationWithScenes>,
+    onDelete: (AutomationWithScenes) -> Unit,
+    onToggle: (AutomationWithScenes, Boolean) -> Unit
 ) {
 
     Scaffold(
@@ -53,7 +53,7 @@ fun AutomationsScreen(
             FloatingActionButton(onClick = {
                 navController.navigate("addAutomation")
             }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_automation)) // TODO: Use resources
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_automation))
             }
         }
     ) { paddingValues ->
@@ -76,7 +76,7 @@ fun AutomationsScreen(
 
 @Composable
 fun AutomationRow(
-    automation: IAutomationWithScenes,
+    automation: AutomationWithScenes,
     navController: NavController,
     onDelete: () -> Unit,
     onToggle: (Boolean) -> Unit

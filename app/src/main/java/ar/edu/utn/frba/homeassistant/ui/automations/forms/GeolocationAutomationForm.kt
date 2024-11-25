@@ -24,18 +24,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
-import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
+import ar.edu.utn.frba.homeassistant.data.model.Automation
+import ar.edu.utn.frba.homeassistant.data.model.AutomationWithScenes
+import ar.edu.utn.frba.homeassistant.data.model.GEOLOCATION_AUTOMATION
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 
 @Composable
 fun GeolocationAutomationForm(
     getCurrentCoordinates: GetCurrentCoordinates,
     selectedScenes: Set<Scene>,
-    onCreate: (IAutomation) -> Unit,
+    onCreate: (Automation) -> Unit,
     automationId: Long,
-    automationWithScenes: GeolocationAutomationWithScenes?
+    automationWithScenes: AutomationWithScenes?
 ) {
     val automation = automationWithScenes?.automation
 
@@ -120,15 +120,16 @@ fun GeolocationAutomationForm(
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
                     } else {
-                        val newAutomation = GeolocationAutomation(
+                        val newAutomation = Automation(
                             automationId = automationId,
                             latitude = latitude,
                             longitude = longitude,
                             name = "$latitude, $longitude",
                             radius = radius,
+                            type = GEOLOCATION_AUTOMATION
                         )
 
-                        onCreate(newAutomation as IAutomation)
+                        onCreate(newAutomation)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

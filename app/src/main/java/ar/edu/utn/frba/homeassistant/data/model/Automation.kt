@@ -6,21 +6,52 @@ import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-interface IAutomation {
-    val automationId: Long
-    val name: String
-    val isOn: Boolean
-    val enabled: Boolean
-}
-
 @Entity
-data class ClockAutomation(
+data class Automation(
     @PrimaryKey(autoGenerate = true)
-    override val automationId: Long = 0,
+    val automationId: Long = 0,
+    val name: String,
+    val isOn: Boolean = false,
+    val enabled: Boolean = true,
+    val type: String,
+    // ClockAutomation
+    val time: String? = null,
+    val shouldTurnOn: Boolean? = null,
+    val monday: Boolean? = null,
+    val tuesday: Boolean? = null,
+    val wednesday: Boolean? = null,
+    val thursday: Boolean? = null,
+    val friday: Boolean? = null,
+    val saturday: Boolean? = null,
+    val sunday: Boolean? = null,
+    // GeolocationAutomation
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val radius: Float? = null,
+)
+
+@Entity(primaryKeys = ["sceneId", "automationId"])
+data class AutomationSceneCrossRef(
+    val sceneId: Long,
+    val automationId: Long
+)
+
+data class AutomationWithScenes(
+    @Relation(
+        parentColumn = "automationId",
+        entityColumn = "sceneId",
+        associateBy = Junction(AutomationSceneCrossRef::class)
+    )
+    val scenes: List<Scene>,
+    @Embedded val automation: Automation
+)
+
+data class ClockAutomation(
+    val automationId: Long,
+    val name: String,
+    val isOn: Boolean,
+    val enabled: Boolean,
     val time: String,
-    override val isOn: Boolean = false,
-    override val name: String,
-    override val enabled: Boolean,
     val shouldTurnOn: Boolean,
     val monday: Boolean,
     val tuesday: Boolean,
@@ -29,86 +60,72 @@ data class ClockAutomation(
     val friday: Boolean,
     val saturday: Boolean,
     val sunday: Boolean
-) : IAutomation
+)
 
-interface IAutomationWithScenes {
-    val scenes: List<Scene>
-    val automation: IAutomation
-}
 
-data class ClockAutomationWithScenes(
-    @Relation(
-        parentColumn = "automationId",
-        entityColumn = "sceneId",
-        associateBy = Junction(ClockAutomationSceneCrossRef::class)
+const val CLOCK_AUTOMATION = "ClockAutomation"
+
+fun Automation.toClockAutomation(): ClockAutomation {
+    if (type != CLOCK_AUTOMATION) throw Exception("Tried to convert $type to ClockAutomation")
+    return ClockAutomation(
+        automationId = automationId,
+        name = name,
+        isOn = isOn,
+        enabled = enabled,
+        time = time ?: "",
+        shouldTurnOn = shouldTurnOn ?: false,
+        monday = monday ?: false,
+        tuesday = tuesday ?: false,
+        wednesday = wednesday ?: false,
+        thursday = thursday ?: false,
+        friday = friday ?: false,
+        saturday = saturday ?: false,
+        sunday = sunday ?: false
     )
-    override val scenes: List<Scene>,
-    @Embedded override val automation: ClockAutomation
-) : IAutomationWithScenes
-
-
-interface IAutomationSceneCrossRef {
-    val automationId: Long
-    val sceneId: Long
 }
 
-@Entity(primaryKeys = ["sceneId", "automationId"])
-data class ClockAutomationSceneCrossRef(
-    override val sceneId: Long,
-    override val automationId: Long
-) : IAutomationSceneCrossRef
-
-@Entity(primaryKeys = ["sceneId", "automationId"])
-data class GeolocationAutomationSceneCrossRef(
-    override val sceneId: Long,
-    override val automationId: Long
-) : IAutomationSceneCrossRef
-
-@Entity
 data class GeolocationAutomation(
-    @PrimaryKey(autoGenerate = true)
-    override val automationId: Long = 0,
+    val automationId: Long,
+    val name: String,
+    val isOn: Boolean,
+    val enabled: Boolean,
     val latitude: Double,
     val longitude: Double,
-    val radius: Float,
-    override val isOn: Boolean = false,
-    override val name: String,
-    override val enabled: Boolean = true,
-) : IAutomation
+    val radius: Float
+)
 
-data class GeolocationAutomationWithScenes(
-    @Relation(
-        parentColumn = "automationId",
-        entityColumn = "sceneId",
-        associateBy = Junction(GeolocationAutomationSceneCrossRef::class)
+
+const val GEOLOCATION_AUTOMATION = "GeolocationAutomation"
+
+fun Automation.toGeolocationAutomation(): GeolocationAutomation {
+    if (type != GEOLOCATION_AUTOMATION) throw Exception("Tried to convert $type to GeolocationAutomation")
+    return GeolocationAutomation(
+        automationId = automationId,
+        name = name,
+        isOn = isOn,
+        enabled = enabled,
+        latitude = latitude ?: 0.0,
+        longitude = longitude ?: 0.0,
+        radius = radius ?: 0f
     )
-    override val scenes: List<Scene>,
-    @Embedded override val automation: GeolocationAutomation
-) : IAutomationWithScenes
+}
 
-
-@Entity
 data class ShakeAutomation(
-    @PrimaryKey(autoGenerate = true)
-    override val automationId: Long = 0,
-    override val isOn: Boolean = false,
-    override val name: String,
-    override val enabled: Boolean = true,
-    val threshold: Int = 100
-) : IAutomation
+    val automationId: Long,
+    val name: String,
+    val isOn: Boolean,
+    val enabled: Boolean,
+)
 
-data class ShakeAutomationWithScenes(
-    @Relation(
-        parentColumn = "automationId",
-        entityColumn = "sceneId",
-        associateBy = Junction(ShakeAutomationSceneCrossRef::class)
+
+const val SHAKE_AUTOMATION = "ShakeAutomation"
+
+fun Automation.toShakeAutomation(): ShakeAutomation {
+    if (type != SHAKE_AUTOMATION) throw Exception("Tried to convert $type to ShakeAutomation")
+    return ShakeAutomation(
+        automationId = automationId,
+        name = name,
+        isOn = isOn,
+        enabled = enabled,
     )
-    override val scenes: List<Scene>,
-    @Embedded override val automation: ShakeAutomation
-) : IAutomationWithScenes
-
-@Entity(primaryKeys = ["sceneId", "automationId"])
-data class ShakeAutomationSceneCrossRef(
-    override val sceneId: Long,
-    override val automationId: Long
-) : IAutomationSceneCrossRef
+}
