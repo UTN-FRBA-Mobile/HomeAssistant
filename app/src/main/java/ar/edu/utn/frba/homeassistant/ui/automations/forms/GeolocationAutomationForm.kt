@@ -39,6 +39,7 @@ fun GeolocationAutomationForm(
 ) {
     val automation = automationWithScenes?.automation
 
+    var name by remember { mutableStateOf(automation?.name ?: "") }
     var latitude by remember { mutableDoubleStateOf(automation?.latitude ?: 0.0) }
     var longitude by remember { mutableDoubleStateOf(automation?.longitude ?: 0.0) }
     var radius by remember { mutableFloatStateOf(automation?.radius ?: 100f) }
@@ -71,8 +72,16 @@ fun GeolocationAutomationForm(
         modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(
-        ) {
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = latitude.toString(),
                 onValueChange = { latitude = it.toDouble() },
@@ -124,7 +133,7 @@ fun GeolocationAutomationForm(
                             automationId = automationId,
                             latitude = latitude,
                             longitude = longitude,
-                            name = "$latitude, $longitude",
+                            name = name,
                             radius = radius,
                             type = GEOLOCATION_AUTOMATION
                         )
