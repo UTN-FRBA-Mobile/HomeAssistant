@@ -43,7 +43,9 @@ or
 telnet localhost 5554 ## windows
 ```
 
-Input credetials
+```bash
+auth {{credentials}} ## the console will tell you where your credentials are stored
+```
 
 ```bash
 redir add udp:54321:54321
