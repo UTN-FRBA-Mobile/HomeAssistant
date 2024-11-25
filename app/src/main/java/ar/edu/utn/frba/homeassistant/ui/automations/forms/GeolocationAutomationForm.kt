@@ -40,6 +40,7 @@ fun GeolocationAutomationForm(
     val automation = automationWithScenes?.automation
 
     var name by remember { mutableStateOf(automation?.name ?: "") }
+    var isNameValid by remember { mutableStateOf(true) }
     var latitude by remember { mutableDoubleStateOf(automation?.latitude ?: 0.0) }
     var longitude by remember { mutableDoubleStateOf(automation?.longitude ?: 0.0) }
     var radius by remember { mutableFloatStateOf(automation?.radius ?: 100f) }
@@ -78,9 +79,14 @@ fun GeolocationAutomationForm(
                 onValueChange = { name = it },
                 label = { Text("Name") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = !isNameValid,
+                supportingText = {
+                    if (!isNameValid) {
+                        Text(stringResource(R.string.name_not_empty))
+                    }
+                }
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = latitude.toString(),
@@ -128,6 +134,8 @@ fun GeolocationAutomationForm(
                 onClick = {
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
+                    } else if (name.isBlank() ) {
+                        isNameValid = false
                     } else {
                         val newAutomation = Automation(
                             automationId = automationId,
