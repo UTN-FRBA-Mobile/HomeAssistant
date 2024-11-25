@@ -55,7 +55,7 @@ fun registerGeofenceReceiver(context: Context, deviceIds: LongArray, automation:
     Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Registering geolocation automation")
     val latitude = automation.latitude
     val longitude = automation.longitude
-    val radius = /*automation.radius*/ 100f
+    val radius = automation.radius
 
     if (latitude == 0.0 || longitude == 0.0) {
         Log.d(GEOFENCE_TAG, "[registerGeofenceReceiver]: Invalid parameters found. Can't register geolocation automation. Received latitude: $latitude, longitude: $longitude, id: $automationId")

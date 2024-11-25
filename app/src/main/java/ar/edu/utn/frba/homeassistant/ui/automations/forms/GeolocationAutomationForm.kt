@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ fun GeolocationAutomationForm(
 
     var latitude by remember { mutableDoubleStateOf(automation?.latitude ?: 0.0) }
     var longitude by remember { mutableDoubleStateOf(automation?.longitude ?: 0.0) }
+    var radius by remember { mutableFloatStateOf(automation?.radius ?: 100f) }
 
     var showAlert by remember { mutableStateOf(false) }
     if (showAlert) {
@@ -89,6 +91,15 @@ fun GeolocationAutomationForm(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            OutlinedTextField(
+                value = radius.toString(),
+                onValueChange = { radius = it.toFloat() },
+                label = { Text("Radius") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
             Button(
                 onClick = {
                     getCurrentCoordinates { lat, long ->
@@ -113,7 +124,8 @@ fun GeolocationAutomationForm(
                             automationId = automationId,
                             latitude = latitude,
                             longitude = longitude,
-                            name = "${latitude}, ${longitude}"
+                            name = "$latitude, $longitude",
+                            radius = radius,
                         )
 
                         onCreate(newAutomation as IAutomation)

@@ -70,6 +70,7 @@ data class GeolocationAutomation(
     override val automationId: Long = 0,
     val latitude: Double,
     val longitude: Double,
+    val radius: Float,
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean = true,
