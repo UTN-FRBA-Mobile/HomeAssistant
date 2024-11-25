@@ -4,7 +4,6 @@ import android.app.TimePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,7 +49,9 @@ fun ClockAutomationForm(
     val automation = automationWithScenes?.automation
 
     var name by remember { mutableStateOf(automation?.name ?: "") }
-    var time by remember { mutableStateOf(automation?.time ?: "00:00") }
+    var isNameValid by remember { mutableStateOf(true) }
+    var time by remember { mutableStateOf(automation?.time ?: "") }
+    var isTimeValid by remember { mutableStateOf(true) }
     var shouldTurnOn by remember { mutableStateOf(automation?.shouldTurnOn ?: true) }
 
     val days = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -113,12 +114,20 @@ fun ClockAutomationForm(
         Column {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = {
+                    name = it
+                    isNameValid = it.isNotBlank()
+                },
                 label = { Text("Name") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = !isNameValid,
+                supportingText = {
+                    if (!isNameValid) {
+                        Text(stringResource(R.string.name_not_empty))
+                    }
+                }
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = time,
@@ -127,16 +136,26 @@ fun ClockAutomationForm(
                 readOnly = true,
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    IconButton(onClick = { showTimePicker { time = it } }) {
+                    IconButton(onClick = {
+                        showTimePicker {
+                            time = it
+                            isTimeValid = it.isNotBlank()
+                        }
+                    }) {
                         Icon(
                             Icons.Default.DateRange,
                             contentDescription = stringResource(R.string.select_start)
                         )
                     }
+                },
+                isError = !isTimeValid,
+                supportingText = {
+                    if (!isTimeValid) {
+                        Text(stringResource(R.string.time_not_empty))
+                    }
                 }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -196,6 +215,9 @@ fun ClockAutomationForm(
                 onClick = {
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
+                    } else if (name.isBlank() || time.isBlank()) {
+                        isNameValid = name.isNotBlank()
+                        isTimeValid = time.isNotBlank()
                     } else {
                         val newAutomation = Automation(
                             automationId = automationId,

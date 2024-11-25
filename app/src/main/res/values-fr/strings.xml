@@ -54,4 +54,6 @@
     <string name="my_scenes">Mes Scènes</string>
     <string name="delete_scene">Supprimer la Scène</string>
     <string name="sure_to_delete_scene">Êtes vous sûr de vouloir supprimer cette scène?</string>
+    <string name="name_not_empty">Veuillez entrer un nom</string>
+    <string name="time_not_empty">Veuillez saisir une heure de déclenchement</string>
 </resources>

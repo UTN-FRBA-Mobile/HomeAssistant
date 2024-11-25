@@ -8,12 +8,12 @@
     <string name="selected_opt">opciones elegidas</string>
     <string name="select_scenes">Elige escenas</string>
     <string name="do_anyway">Hacerlo de todos modos</string>
-    <string name="action_impossible">Accion imposible</string>
+    <string name="action_impossible">Acción imposible</string>
     <string name="you_didnt_select">No elegiste ninguna escena. Tienes que elegir al menos una.</string>
     <string name="trigger_time">Tiempo de activacion</string>
     <string name="select_start">Elije un tiempo de activacion</string>
     <string name="should_turn_on">Debe encenderse?</string>
-    <string name="select_days">Elige dias en la semana</string>
+    <string name="select_days">Elige días en la semana</string>
     <string name="monday">Lunes</string>
     <string name="use_current_loc">Usar actual localizacion</string>
     <string name="save">Ahorrar</string>
@@ -54,4 +54,6 @@
     <string name="my_scenes">Mis Escenas</string>
     <string name="delete_scene">Borrar la Escena</string>
     <string name="sure_to_delete_scene">Estas seguro que queres borrar esta escena?</string>
+    <string name="name_not_empty">Por favor ingrese un nombre</string>
+    <string name="time_not_empty">Por favor ingrese un tiempo de activación</string>
 </resources>
