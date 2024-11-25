@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.Automation
@@ -47,9 +49,11 @@ fun ClockAutomationForm(
 ) {
     val automation = automationWithScenes?.automation
 
-    var time by remember { mutableStateOf(automation?.time ?: "") }
+    var name by remember { mutableStateOf(automation?.name ?: "") }
+    var time by remember { mutableStateOf(automation?.time ?: "00:00") }
     var shouldTurnOn by remember { mutableStateOf(automation?.shouldTurnOn ?: true) }
 
+    val days = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     val selectedDays = remember {
         mutableStateMapOf( // Estado para días seleccionados
             "Monday" to (automation?.monday ?: false),
@@ -108,6 +112,15 @@ fun ClockAutomationForm(
     ) {
         Column {
             OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
                 value = time,
                 onValueChange = { },
                 label = { Text(stringResource(R.string.trigger_time)) },
@@ -143,9 +156,12 @@ fun ClockAutomationForm(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    selectedDays.keys.filterIndexed { index, _ -> index % 2 == 0 }
+                    days.filterIndexed { index, _ -> index % 2 == 0 }
                         .forEachIndexed { index, day ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.height(30.dp)
+                            ) {
                                 Checkbox(
                                     checked = selectedDays[day] ?: false,
                                     onCheckedChange = { selectedDays[day] = it }
@@ -155,9 +171,12 @@ fun ClockAutomationForm(
                         }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    selectedDays.keys.filterIndexed { index, _ -> index % 2 != 0 }
+                    days.filterIndexed { index, _ -> index % 2 != 0 }
                         .forEachIndexed { index, day ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.height(30.dp)
+                            ) {
                                 Checkbox(
                                     checked = selectedDays[day] ?: false,
                                     onCheckedChange = { selectedDays[day] = it }
@@ -178,16 +197,11 @@ fun ClockAutomationForm(
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
                     } else {
-
-                        val name = selectedDays.entries.filter { it.value }
-                            .map { it.key.slice(IntRange(0, 1)) }.joinToString(
-                                ", "
-                            )
                         val newAutomation = Automation(
                             automationId = automationId,
                             time = time,
                             isOn = false,
-                            name = "[${name}] - ${time}",
+                            name = name,
                             enabled = true,
                             shouldTurnOn = shouldTurnOn,
                             monday = selectedDays["Monday"] ?: false,

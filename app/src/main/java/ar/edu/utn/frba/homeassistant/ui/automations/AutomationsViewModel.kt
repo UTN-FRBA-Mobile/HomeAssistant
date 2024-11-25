@@ -112,9 +112,9 @@ class AutomationsViewModel @Inject constructor(
         Log.d(TAG, "[addAutomation]: Request to add $automationName for scenes:  $sceneNames")
 
         viewModelScope.launch {
-            Log.d(TAG, "[addClockAutomation]: Request to save automation in database")
+            Log.d(TAG, "[addAutomation]: Request to save automation in database")
             val id = repository.addAutomation(automation, scenes.toList())
-            Log.d(TAG, "[addClockAutomation]: Automation successfully saved with id $id")
+            Log.d(TAG, "[addAutomation]: Automation successfully saved with id $id")
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
             when (automation.type) {
                 CLOCK_AUTOMATION -> registerClockAutomation(devicesIds, id, automation.toClockAutomation())
@@ -132,8 +132,7 @@ class AutomationsViewModel @Inject constructor(
         scenes: Set<Scene>
     ) {
         val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
-        val automationName = automation::class::simpleName.get()
-        Log.d(TAG, "[addAutomation]: Request to update $automationName for scenes:  $sceneNames")
+        Log.d(TAG, "[updateAutomation]: Request to update ${automation.type} for scenes:  $sceneNames")
 
         viewModelScope.launch {
             val automationId = automation.automationId
