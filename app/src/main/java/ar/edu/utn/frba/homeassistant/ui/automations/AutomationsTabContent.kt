@@ -24,7 +24,8 @@ fun AutomationsTabContent(
                 navController,
                 viewModel::addAutomation,
                 scenes = scenes,
-                getCurrentCoordinates
+                getCurrentCoordinates,
+                automations = automationsWithScenes
             )
         }
         composable("editAutomation/{automationId}") { backStackEntry ->

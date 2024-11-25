@@ -76,8 +76,9 @@ fun AutomationForm(
     onUpdate: (Automation, Set<Scene>, Automation, Set<Scene>) -> Unit = { _, _, _, _ -> },
     automationsWithScenes: List<AutomationWithScenes>,
 ) {
-    val automationWithScenes = automationsWithScenes.find { it.automation.automationId == automationId }
-    val isEditMode = automationWithScenes != null
+    val automationWithScenes =
+        automationsWithScenes.find { it.automation.automationId == automationId }
+    val isEditMode = automationId > 0 && automationWithScenes != null
 
     val initialSelectedAutomation = when (automationWithScenes?.automation?.type) {
         CLOCK_AUTOMATION -> CLOCK_AUTOMATION_LABEL
@@ -93,12 +94,31 @@ fun AutomationForm(
 
     val handleUpsert: (Automation) -> Unit = {
         if (isEditMode) {
-            onUpdate(automationWithScenes!!.automation, automationWithScenes.scenes.toSet(), it, selectedScenes)
+            onUpdate(
+                automationWithScenes!!.automation,
+                automationWithScenes.scenes.toSet(),
+                it,
+                selectedScenes
+            )
         } else {
             onCreate(it, selectedScenes)
         }
         goBack()
     }
+
+    val shakeAutomationExists = automationsWithScenes.any { it.automation.type == SHAKE_AUTOMATION }
+    val automationOptions =
+        if (shakeAutomationExists)
+            listOf(
+                CLOCK_AUTOMATION_LABEL,
+                GEOLOCATION_AUTOMATION_LABEL
+            )
+        else
+            listOf(
+                CLOCK_AUTOMATION_LABEL,
+                GEOLOCATION_AUTOMATION_LABEL,
+                SHAKE_AUTOMATION_LABEL
+            )
 
     Scaffold(
         topBar = {
@@ -106,7 +126,10 @@ fun AutomationForm(
                 title = { Text(if (isEditMode) "Edit automation" else stringResource(R.string.add_new_auto)) },
                 navigationIcon = {
                     IconButton(onClick = { goBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -124,11 +147,7 @@ fun AutomationForm(
 
                 DropdownMenuComponent(
                     selectedOption = selectedAutomation,
-                    options = listOf(
-                        CLOCK_AUTOMATION_LABEL,
-                        GEOLOCATION_AUTOMATION_LABEL,
-                        SHAKE_AUTOMATION_LABEL
-                    ),
+                    options = automationOptions,
                     onOptionSelected = { selectedAutomation = it },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isEditMode
@@ -136,7 +155,7 @@ fun AutomationForm(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                MultiSelectDropdownComponent<Scene>(
+                MultiSelectDropdownComponent(
                     options = scenes,
                     selectedOptions = selectedScenes,
                     onOptionSelected = { selectedScenes = it },
