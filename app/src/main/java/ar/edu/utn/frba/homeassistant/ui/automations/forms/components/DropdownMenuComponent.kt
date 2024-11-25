@@ -26,7 +26,8 @@ fun DropdownMenuComponent(
     selectedOption: String,
     options: List<String>,
     onOptionSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -35,14 +36,16 @@ fun DropdownMenuComponent(
         OutlinedTextField(
             value = selectedOption,
             onValueChange = { },
-            label = { Text(stringResource(R.string.select_auto)) },
+            label = { Text(if (enabled) stringResource(R.string.select_auto) else "Automation Type") },
             readOnly = true,
             modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown_menu))
+            trailingIcon = if (enabled) {
+                {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown_menu))
+                    }
                 }
-            }
+            } else null
         )
         DropdownMenu(
             expanded = expanded,

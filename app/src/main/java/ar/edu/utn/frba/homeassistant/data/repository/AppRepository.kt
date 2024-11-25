@@ -39,9 +39,11 @@ class AppRepository @Inject constructor(
 
     fun getScenes() = sceneDao.getAll()
 
-    private suspend fun getScenesWithDevicesByIds(sceneIds: List<Long>) = sceneDao.getScenesWithDevicesByIds(sceneIds)
+    private suspend fun getScenesWithDevicesByIds(sceneIds: List<Long>) =
+        sceneDao.getScenesWithDevicesByIds(sceneIds)
 
-    suspend fun getScenesDevicesIds(sceneIds: List<Long>) = getScenesWithDevicesByIds(sceneIds).flatMap { it.devices }.map { it.deviceId }
+    suspend fun getScenesDevicesIds(sceneIds: List<Long>) =
+        getScenesWithDevicesByIds(sceneIds).flatMap { it.devices }.map { it.deviceId }
 
     suspend fun addScene(name: String, devices: List<Device>) {
         val sceneId = sceneDao.insert(Scene(name = name))
@@ -75,19 +77,28 @@ class AppRepository @Inject constructor(
 
     suspend fun addAutomation(automation: ClockAutomation, scenes: List<Scene>): Long {
         val id = automationDao.insert(automation)
+        addClockAutomationScenes(scenes, id)
+        return id
+    }
+
+    private suspend fun addClockAutomationScenes(scenes: List<Scene>, automationId: Long) {
         scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
                 ClockAutomationSceneCrossRef(
                     it.sceneId,
-                    id
+                    automationId
                 )
             )
         }
-        return id
     }
 
     suspend fun addAutomation(automation: GeolocationAutomation, scenes: List<Scene>): Long {
         val id = automationDao.insert(automation)
+        addGeoAutomationScenes(scenes, id)
+        return id
+    }
+
+    private suspend fun addGeoAutomationScenes(scenes: List<Scene>, id: Long) {
         scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
                 GeolocationAutomationSceneCrossRef(
@@ -96,11 +107,15 @@ class AppRepository @Inject constructor(
                 )
             )
         }
-        return id
     }
 
     suspend fun addAutomation(automation: ShakeAutomation, scenes: List<Scene>): Long {
         val id = automationDao.insert(automation)
+        addShakeAutomationScenes(scenes, id)
+        return id
+    }
+
+    private suspend fun addShakeAutomationScenes(scenes: List<Scene>, id: Long) {
         scenes.forEach {
             automationDao.insertAutomationSceneCrossRef(
                 ShakeAutomationSceneCrossRef(
@@ -109,7 +124,6 @@ class AppRepository @Inject constructor(
                 )
             )
         }
-        return id
     }
 
     suspend fun updateAutomation(automation: IAutomation) {
@@ -118,6 +132,32 @@ class AppRepository @Inject constructor(
             is GeolocationAutomation -> automationDao.update(automation)
             is ShakeAutomation -> automationDao.update(automation)
         }
+    }
+
+    suspend fun updateAutomation(automation: IAutomation, scenes: List<Scene>) {
+        when (automation) {
+            is ClockAutomation -> updateClockAutomation(automation, scenes)
+            is GeolocationAutomation -> updateGeoAutomation(automation, scenes)
+            is ShakeAutomation -> updateShakeAutomation(automation, scenes)
+        }
+    }
+
+    private suspend fun updateClockAutomation(automation: ClockAutomation, scenes: List<Scene>) {
+        automationDao.update(automation)
+        automationDao.deleteClockAutomationScenes(automation.automationId)
+        addClockAutomationScenes(scenes, automation.automationId)
+    }
+
+    private suspend fun updateGeoAutomation(automation: GeolocationAutomation, scenes: List<Scene>) {
+        automationDao.update(automation)
+        automationDao.deleteGeoAutomationScenes(automation.automationId)
+        addGeoAutomationScenes(scenes, automation.automationId)
+    }
+
+    private suspend fun updateShakeAutomation(automation: ShakeAutomation, scenes: List<Scene>) {
+        automationDao.update(automation)
+        automationDao.deleteShakeAutomationScenes(automation.automationId)
+        addShakeAutomationScenes(scenes, automation.automationId)
     }
 
     suspend fun deleteAutomation(automation: IAutomation) {

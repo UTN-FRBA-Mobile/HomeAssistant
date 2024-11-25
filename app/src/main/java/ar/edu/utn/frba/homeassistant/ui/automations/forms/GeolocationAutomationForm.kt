@@ -1,9 +1,5 @@
 package ar.edu.utn.frba.homeassistant.ui.automations.forms
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,30 +21,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 import ar.edu.utn.frba.homeassistant.R
 import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomation
+import ar.edu.utn.frba.homeassistant.data.model.GeolocationAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
-import ar.edu.utn.frba.homeassistant.utils.requestLocationPermissions
-import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
 fun GeolocationAutomationForm(
     getCurrentCoordinates: GetCurrentCoordinates,
-    selectedScenes : Set<Scene>,
-    onCreate: (IAutomation) -> Unit
+    selectedScenes: Set<Scene>,
+    onCreate: (IAutomation) -> Unit,
+    automationId: Long,
+    automationWithScenes: GeolocationAutomationWithScenes?
 ) {
-    var latitude by remember { mutableDoubleStateOf(0.0) }
-    var longitude by remember { mutableDoubleStateOf(0.0) }
+    val automation = automationWithScenes?.automation
+
+    var latitude by remember { mutableDoubleStateOf(automation?.latitude ?: 0.0) }
+    var longitude by remember { mutableDoubleStateOf(automation?.longitude ?: 0.0) }
 
     var showAlert by remember { mutableStateOf(false) }
     if (showAlert) {
         AlertDialog(
             onDismissRequest = { showAlert = false },
             confirmButton = {
-                if(false) {
+                if (false) {
                     Button(onClick = {
                         showAlert = false
                     }) {
@@ -110,15 +108,15 @@ fun GeolocationAutomationForm(
                 onClick = {
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
-                    }else {
-                        val automation: GeolocationAutomation = GeolocationAutomation(
-                            automationId = null,
+                    } else {
+                        val newAutomation = GeolocationAutomation(
+                            automationId = automationId,
                             latitude = latitude,
                             longitude = longitude,
                             name = "${latitude}, ${longitude}"
                         )
 
-                        onCreate(automation as IAutomation)
+                        onCreate(newAutomation as IAutomation)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

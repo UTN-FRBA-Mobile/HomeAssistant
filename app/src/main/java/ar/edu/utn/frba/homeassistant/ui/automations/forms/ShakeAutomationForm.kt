@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,17 +21,18 @@ import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomation
 
 @Composable
 fun ShakeAutomationForm(
-    selectedScenes : Set<Scene>,
+    selectedScenes: Set<Scene>,
     onCreate: (IAutomation) -> Unit,
+    automationId: Long,
 ) {
-    var shakeIntensity by remember { mutableStateOf(0f) }
+//    var shakeIntensity by remember { mutableStateOf(0f) }
 
     var showAlert by remember { mutableStateOf(false) }
     if (showAlert) {
         AlertDialog(
             onDismissRequest = { showAlert = false },
             confirmButton = {
-                if(false) {
+                if (false) {
                     Button(onClick = {
                         showAlert = false
                     }) {
@@ -55,15 +55,16 @@ fun ShakeAutomationForm(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column {
-            Text(text = stringResource(R.string.shake_intensity))
-            Slider(
-                value = shakeIntensity,
-                onValueChange = { shakeIntensity = it },
-                valueRange = 0f..10f,
-                steps = 9,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(text = "Selected Intensity: ${shakeIntensity.toInt()}")
+//            Removed because we are going to use a default value for the intensity
+//            Text(text = stringResource(R.string.shake_intensity))
+//            Slider(
+//                value = shakeIntensity,
+//                onValueChange = { shakeIntensity = it },
+//                valueRange = 0f..10f,
+//                steps = 9,
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//            Text(text = "Selected Intensity: ${shakeIntensity.toInt()}")
         }
 
         Column {
@@ -71,11 +72,10 @@ fun ShakeAutomationForm(
                 onClick = {
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
-                    }else {
+                    } else {
                         val automation = ShakeAutomation(
-                            automationId = null,
-                            name = "Shake Automation ${shakeIntensity.toInt()}",
-                            threshold = shakeIntensity.toInt()
+                            automationId = automationId,
+                            name = "Shake Automation",
                         )
                         onCreate(automation)
                     }

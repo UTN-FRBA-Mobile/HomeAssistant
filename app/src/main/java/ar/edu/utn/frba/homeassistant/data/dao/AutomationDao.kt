@@ -52,6 +52,15 @@ interface AutomationDao {
     @Insert
     suspend fun insertAutomationSceneCrossRef(automationSceneCrossRef: GeolocationAutomationSceneCrossRef)
 
+    @Query("DELETE FROM clockAutomationSceneCrossRef WHERE automationId = :automationId")
+    suspend fun deleteClockAutomationScenes(automationId: Long)
+
+    @Query("DELETE FROM geolocationAutomationSceneCrossRef WHERE automationId = :automationId")
+    suspend fun deleteGeoAutomationScenes(automationId: Long)
+
+    @Query("DELETE FROM shakeAutomationSceneCrossRef WHERE automationId = :automationId")
+    suspend fun deleteShakeAutomationScenes(automationId: Long)
+
     @Update
     suspend fun update(automation: ClockAutomation)
 

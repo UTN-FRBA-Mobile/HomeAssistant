@@ -10,7 +10,10 @@ import androidx.navigation.compose.rememberNavController
 import ar.edu.utn.frba.homeassistant.GetCurrentCoordinates
 
 @Composable
-fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), getCurrentCoordinates: GetCurrentCoordinates) {
+fun AutomationsTabContent(
+    viewModel: AutomationsViewModel = hiltViewModel(),
+    getCurrentCoordinates: GetCurrentCoordinates
+) {
     val navController = rememberNavController()
     val clockAutomations by viewModel.clockAutomations.observeAsState(emptyList())
     val geolocationAutomations by viewModel.geolocationAutomations.observeAsState(emptyList())
@@ -19,11 +22,34 @@ fun AutomationsTabContent(viewModel: AutomationsViewModel = hiltViewModel(), get
 
     NavHost(navController, startDestination = "automationsList") {
         composable("addAutomation") {
-            AddAutomationScreen(navController, viewModel::addAutomation, scenes = scenes, getCurrentCoordinates = getCurrentCoordinates)
+            AddEditAutomationScreen(
+                navController,
+                viewModel::addAutomation,
+                scenes = scenes,
+                getCurrentCoordinates
+            )
+        }
+        composable("editAutomation/{automationId}") { backStackEntry ->
+            val automationId = backStackEntry.arguments?.getString("automationId")?.toLong() ?: 0
+            val automationsWithScenes = clockAutomations + geolocationAutomations + shakeAutomations
+            AddEditAutomationScreen(
+                navController,
+                viewModel::addAutomation,
+                scenes = scenes,
+                getCurrentCoordinates,
+                automationId,
+                viewModel::updateAutomation,
+                automationsWithScenes
+            )
         }
         composable("automationsList") {
             val automationsWithScenes = clockAutomations + geolocationAutomations + shakeAutomations
-            AutomationsScreen(navController, automationsWithScenes, viewModel::deleteAutomation, viewModel::toggleAutomation)
+            AutomationsScreen(
+                navController,
+                automationsWithScenes,
+                viewModel::deleteAutomation,
+                viewModel::toggleAutomation
+            )
         }
     }
 }

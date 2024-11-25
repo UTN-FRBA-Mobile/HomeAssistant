@@ -7,16 +7,16 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 
 interface IAutomation {
-    val automationId: Long?
+    val automationId: Long
     val name: String
     val isOn: Boolean
     val enabled: Boolean
 }
 
 @Entity
-data class ClockAutomation (
+data class ClockAutomation(
     @PrimaryKey(autoGenerate = true)
-    override val automationId: Long?,
+    override val automationId: Long = 0,
     val time: String,
     override val isOn: Boolean = false,
     override val name: String,
@@ -29,10 +29,10 @@ data class ClockAutomation (
     val friday: Boolean,
     val saturday: Boolean,
     val sunday: Boolean
-): IAutomation
+) : IAutomation
 
 interface IAutomationWithScenes {
-    val scenes : List<Scene>
+    val scenes: List<Scene>
     val automation: IAutomation
 }
 
@@ -44,7 +44,7 @@ data class ClockAutomationWithScenes(
     )
     override val scenes: List<Scene>,
     @Embedded override val automation: ClockAutomation
-): IAutomationWithScenes
+) : IAutomationWithScenes
 
 
 interface IAutomationSceneCrossRef {
@@ -56,24 +56,24 @@ interface IAutomationSceneCrossRef {
 data class ClockAutomationSceneCrossRef(
     override val sceneId: Long,
     override val automationId: Long
-): IAutomationSceneCrossRef
+) : IAutomationSceneCrossRef
 
 @Entity(primaryKeys = ["sceneId", "automationId"])
 data class GeolocationAutomationSceneCrossRef(
     override val sceneId: Long,
     override val automationId: Long
-): IAutomationSceneCrossRef
+) : IAutomationSceneCrossRef
 
 @Entity
-data class GeolocationAutomation (
+data class GeolocationAutomation(
     @PrimaryKey(autoGenerate = true)
-    override val automationId: Long?,
+    override val automationId: Long = 0,
     val latitude: Double,
     val longitude: Double,
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean = true,
-): IAutomation
+) : IAutomation
 
 data class GeolocationAutomationWithScenes(
     @Relation(
@@ -83,18 +83,18 @@ data class GeolocationAutomationWithScenes(
     )
     override val scenes: List<Scene>,
     @Embedded override val automation: GeolocationAutomation
-): IAutomationWithScenes
+) : IAutomationWithScenes
 
 
 @Entity
-data class ShakeAutomation (
+data class ShakeAutomation(
     @PrimaryKey(autoGenerate = true)
-    override val automationId: Long?,
+    override val automationId: Long = 0,
     override val isOn: Boolean = false,
     override val name: String,
     override val enabled: Boolean = true,
-    val threshold: Int
-): IAutomation
+    val threshold: Int = 100
+) : IAutomation
 
 data class ShakeAutomationWithScenes(
     @Relation(
@@ -104,10 +104,10 @@ data class ShakeAutomationWithScenes(
     )
     override val scenes: List<Scene>,
     @Embedded override val automation: ShakeAutomation
-): IAutomationWithScenes
+) : IAutomationWithScenes
 
 @Entity(primaryKeys = ["sceneId", "automationId"])
 data class ShakeAutomationSceneCrossRef(
     override val sceneId: Long,
     override val automationId: Long
-): IAutomationSceneCrossRef
+) : IAutomationSceneCrossRef

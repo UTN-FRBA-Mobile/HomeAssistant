@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.IAutomationWithScenes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,7 +112,7 @@ fun AutomationRow(
         Column(modifier = Modifier
             .weight(1f)
             .clickable {
-                navController.navigate("automationDetail/${automation.automation.automationId}")
+                navController.navigate("editAutomation/${automation.automation.automationId}")
             }
         ) {
             Text(text = automation.automation.name, style = MaterialTheme.typography.titleMedium)

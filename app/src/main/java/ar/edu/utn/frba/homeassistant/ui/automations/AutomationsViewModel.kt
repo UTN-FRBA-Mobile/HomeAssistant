@@ -39,7 +39,7 @@ class AutomationsViewModel @Inject constructor(
     fun deleteAutomation(automationWithScenes: IAutomationWithScenes) {
         viewModelScope.launch {
             val automation = automationWithScenes.automation
-            val automationId = automation.automationId!!
+            val automationId = automation.automationId
             val scenes = automationWithScenes.scenes
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
 
@@ -59,7 +59,7 @@ class AutomationsViewModel @Inject constructor(
     fun toggleAutomation(automationWithScenes: IAutomationWithScenes, enable: Boolean) {
         viewModelScope.launch {
             val automation = automationWithScenes.automation
-            val automationId = automation.automationId!!
+            val automationId = automation.automationId
             val scenes = automationWithScenes.scenes
             val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
 
@@ -111,6 +111,34 @@ class AutomationsViewModel @Inject constructor(
                 is ClockAutomation -> addClockAutomation(automation, scenes, devicesIds)
                 is GeolocationAutomation -> addGeolocationAutomation(automation, scenes, devicesIds)
                 is ShakeAutomation -> addShakeAutomation(automation, scenes, devicesIds)
+                else -> Log.wtf(TAG, "[addAutomation]: Unknown automation type")
+            }
+        }
+    }
+
+    fun updateAutomation(originalAutomation: IAutomation, originalScenes: Set<Scene>, automation: IAutomation, scenes: Set<Scene>) {
+        val sceneNames = scenes.map { it.name }.joinToString(", ") { it }
+        val automationName = automation::class::simpleName.get()
+        Log.d(TAG, "[addAutomation]: Request to update $automationName for scenes:  $sceneNames")
+
+        viewModelScope.launch {
+            val automationId = automation.automationId
+            val devicesIds = repository.getScenesDevicesIds(scenes.toList().map { it.sceneId })
+            val originalDevicesIds = repository.getScenesDevicesIds(originalScenes.toList().map { it.sceneId })
+            repository.updateAutomation(automation, scenes.toList())
+            when (automation) {
+                is ClockAutomation -> {
+                    unregisterClockAutomation(originalDevicesIds, automationId, originalAutomation as ClockAutomation)
+                    registerClockAutomation(devicesIds, automationId, automation)
+                }
+                is GeolocationAutomation -> {
+                    unregisterGeolocationAutomation(originalDevicesIds, originalAutomation as GeolocationAutomation)
+                    registerGeolocationAutomation(devicesIds, automation, automationId)
+                }
+                is ShakeAutomation -> {
+                    unregisterShakeAutomation()
+                    registerShakeAutomation(devicesIds)
+                }
                 else -> Log.wtf(TAG, "[addAutomation]: Unknown automation type")
             }
         }

@@ -25,7 +25,7 @@ import ar.edu.utn.frba.homeassistant.data.model.ShakeAutomationSceneCrossRef
     GeolocationAutomationSceneCrossRef::class,
     GeolocationAutomation::class,
     ShakeAutomation::class
- ], version = 12)
+ ], version = 13)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao
     abstract fun sceneDao(): SceneDao

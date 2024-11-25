@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.homeassistant.ui.automations.forms
 
 import android.app.TimePickerDialog
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,29 +32,33 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ar.edu.utn.frba.homeassistant.R
-import ar.edu.utn.frba.homeassistant.TAG
 import ar.edu.utn.frba.homeassistant.data.model.ClockAutomation
+import ar.edu.utn.frba.homeassistant.data.model.ClockAutomationWithScenes
 import ar.edu.utn.frba.homeassistant.data.model.IAutomation
 import ar.edu.utn.frba.homeassistant.data.model.Scene
 import java.util.Calendar
 
 @Composable
 fun ClockAutomationForm(
-    selectedScenes : Set<Scene>,
-    onCreate: (IAutomation) -> Unit
+    selectedScenes: Set<Scene>,
+    onCreate: (IAutomation) -> Unit,
+    automationId: Long,
+    automationWithScenes: ClockAutomationWithScenes?
 ) {
-    var time by remember { mutableStateOf("") }
-    var shouldTurnOn by remember { mutableStateOf(true) }
+    val automation = automationWithScenes?.automation
+
+    var time by remember { mutableStateOf(automation?.time ?: "") }
+    var shouldTurnOn by remember { mutableStateOf(automation?.shouldTurnOn ?: true) }
 
     val selectedDays = remember {
         mutableStateMapOf( // Estado para días seleccionados
-            "Monday" to false,
-            "Tuesday" to false,
-            "Wednesday" to false,
-            "Thursday" to false,
-            "Friday" to false,
-            "Saturday" to false,
-            "Sunday" to false
+            "Monday" to (automation?.monday ?: false),
+            "Tuesday" to (automation?.tuesday ?: false),
+            "Wednesday" to (automation?.wednesday ?: false),
+            "Thursday" to (automation?.thursday ?: false),
+            "Friday" to (automation?.friday ?: false),
+            "Saturday" to (automation?.saturday ?: false),
+            "Sunday" to (automation?.sunday ?: false)
         )
     }
 
@@ -64,7 +67,7 @@ fun ClockAutomationForm(
         AlertDialog(
             onDismissRequest = { showAlert = false },
             confirmButton = {
-                if(false) {
+                if (false) {
                     Button(onClick = {
                         showAlert = false
                     }) {
@@ -171,14 +174,14 @@ fun ClockAutomationForm(
                 onClick = {
                     if (selectedScenes.isEmpty()) {
                         showAlert = true
-                    }else{
+                    } else {
 
                         val name = selectedDays.entries.filter { it.value }
                             .map { it.key.slice(IntRange(0, 1)) }.joinToString(
-                            ", "
+                                ", "
                             )
-                        val automation = ClockAutomation(
-                            automationId = null,
+                        val newAutomation = ClockAutomation(
+                            automationId = automationId,
                             time = time,
                             isOn = false,
                             name = "[${name}] - ${time}",
@@ -192,7 +195,7 @@ fun ClockAutomationForm(
                             saturday = selectedDays["Saturday"] ?: false,
                             sunday = selectedDays["Sunday"] ?: false
                         )
-                        onCreate(automation as IAutomation)
+                        onCreate(newAutomation as IAutomation)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
